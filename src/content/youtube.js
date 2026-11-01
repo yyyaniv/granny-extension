@@ -3,6 +3,7 @@
   const S = window.GrannySelectors;
   let active = null;
   let overlay = null;
+  let paused = false;
 
   // ---------- helpers ----------
   const send = (msg) => {
@@ -45,7 +46,7 @@
   // ---------- hide Shorts and comments ----------
   const style = document.createElement('style');
   style.id = 'granny-hide-style';
-  style.textContent = `html.granny-hide :is(${S.hide.join(',')}) { display: none !important; }`;
+  style.textContent = `html.granny-hide:not(.granny-paused) :is(${S.hide.join(',')}) { display: none !important; }`;
   document.documentElement.appendChild(style);
   function applyFlags(flags) {
     document.documentElement.classList.toggle('granny-hide', !flags || flags.hideShortsComments !== false);
@@ -85,7 +86,7 @@
     return cards.find((c) => c.getBoundingClientRect().top >= 0) || cards[0];
   }
   function ensureActive(retries = 6) {
-    if (!isFeedPage() || overlay) return;
+    if (paused || !isFeedPage() || overlay) return;
     if (active && active.isConnected) return;
     const cards = getCards();
     if (cards.length) setActive(firstInViewport(cards), false);
@@ -151,7 +152,7 @@
     }
   }
   function syncSaveButton() {
-    const show = pageType() === 'watch' && !document.fullscreenElement;
+    const show = !paused && pageType() === 'watch' && !document.fullscreenElement;
     if (show && !saveBtn) {
       saveBtn = document.createElement('button');
       saveBtn.id = 'granny-save-btn';
@@ -166,7 +167,7 @@
 
   // Watch history: sent to the background (it uses the tested lib/history.js).
   function recordHistory() {
-    if (pageType() !== 'watch') return;
+    if (paused || pageType() !== 'watch') return;
     const video = document.querySelector(S.mainVideo);
     const player = playerEl();
     if (!video || (player && player.matches(S.adShowing))) return;
@@ -314,7 +315,7 @@
   }
 
   document.addEventListener('ended', (e) => {
-    if (!(e.target instanceof HTMLVideoElement)) return;
+    if (paused || !(e.target instanceof HTMLVideoElement)) return;
     if (pageType() !== 'watch') return;
     const player = document.querySelector(S.player);
     if (player && player.matches(S.adShowing)) return;
@@ -326,7 +327,7 @@
 
   // ---------- keys ----------
   window.addEventListener('keydown', (e) => {
-    if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
+    if (paused || e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
     if (overlay) { overlayKey(e); return; }
     if (isEditable(e.target) || isEditable(document.activeElement)) return;
     if (e.key === 'Escape') {
@@ -363,6 +364,19 @@
     refreshSaved();
     ensureActive();
   });
+  // ---------- pause: the grandson can switch everything off until Chrome restarts ----------
+  function setPaused(p) {
+    paused = Boolean(p);
+    document.documentElement.classList.toggle('granny-paused', paused);
+    if (paused) { hideOverlay(); setActive(null); }
+    syncSaveButton();
+    ensureActive();
+  }
+  try {
+    chrome.storage.session.get('paused').then((s) => setPaused(s.paused), () => {});
+    chrome.storage.onChanged.addListener((c, area) => { if (area === 'session' && c.paused) setPaused(c.paused.newValue); });
+  } catch { /* extension reloaded */ }
+
   syncSaveButton();
   refreshSaved();
   ensureActive();

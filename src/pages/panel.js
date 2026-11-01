@@ -56,9 +56,24 @@ async function renderHistory() {
   }));
 }
 
+async function paintPause() {
+  const { paused } = await chrome.storage.session.get('paused');
+  $('pause').textContent = paused ? '▶ Увімкнути помічника' : '⏸ Вимкнути до перезапуску Chrome';
+  $('pause-note').hidden = !paused;
+}
+$('pause').addEventListener('click', async () => {
+  const { paused } = await chrome.storage.session.get('paused');
+  await chrome.runtime.sendMessage({ type: 'set-paused', paused: !paused });
+  paintPause();
+});
+
 enableNav({ escapeGoesHome: false });
+paintPause();
 refreshState();
 renderHistory();
 chrome.tabs.onActivated.addListener(refreshState);
 chrome.tabs.onUpdated.addListener((_id, info) => { if (info.url || info.title || info.status) refreshState(); });
-chrome.storage.onChanged.addListener((c, area) => { if (area === 'local' && c.watchHistory) renderHistory(); });
+chrome.storage.onChanged.addListener((c, area) => {
+  if (area === 'local' && c.watchHistory) renderHistory();
+  if (area === 'session' && c.paused) paintPause();
+});

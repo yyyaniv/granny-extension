@@ -110,7 +110,13 @@ async function focusTab(tab) {
   await chrome.windows.update(tab.windowId, { focused: true, drawAttention: true });
 }
 
+// ---------- pause (until Chrome restarts: storage.session is cleared then) ----------
+async function isPaused() {
+  return Boolean((await chrome.storage.session.get('paused')).paused);
+}
+
 async function fireWarn(cfg, entryId, startTime) {
+  if (await isPaused()) return;
   const entry = cfg.schedule.find((e) => e.id === entryId);
   if (!entry || !entry.enabled) return;
   const key = `warned|${entryId}|${startTime}`;
@@ -127,6 +133,7 @@ async function fireWarn(cfg, entryId, startTime) {
 }
 
 async function fireStart(cfg, entryId, startTime) {
+  if (await isPaused()) return;
   const entry = cfg.schedule.find((e) => e.id === entryId);
   if (!entry || !entry.enabled) return;
   if (await isMarked(`done|${entryId}|${startTime}`)) return;
@@ -156,6 +163,8 @@ chrome.alarms.onAlarm.addListener((alarm) => serial(async () => {
 // The toolbar icon opens the side panel (no action.onClicked: they conflict).
 const setupPanel = () => chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => {});
 setupPanel();
+// Content scripts read the pause flag from storage.session.
+chrome.storage.session.setAccessLevel({ accessLevel: 'TRUSTED_AND_UNTRUSTED_CONTEXTS' }).catch(() => {});
 
 const HOME_FOCUS = `${HOME}?f=1`;
 async function refocusStartTabs() {
@@ -187,9 +196,9 @@ chrome.storage.onChanged.addListener((changes, area) => {
 
 // Navigating to the extension page directly gives it keyboard focus
 // (otherwise Chrome may leave focus in the address bar on a new tab).
-chrome.tabs.onCreated.addListener((tab) => {
+chrome.tabs.onCreated.addListener(async (tab) => {
   const u = tab.pendingUrl || tab.url || '';
-  if (u === 'chrome://newtab/' || u === 'chrome://new-tab-page/') {
+  if ((u === 'chrome://newtab/' || u === 'chrome://new-tab-page/') && !(await isPaused())) {
     chrome.tabs.update(tab.id, { url: ext(HOME) }).catch(() => {});
   }
 });
@@ -251,9 +260,18 @@ async function handle(msg, sender) {
     case 'exit-fullscreen':
       if (tab) await exitFullscreen(tab.windowId);
       return { ok: true };
+    case 'set-paused':
+      if (msg.paused) await chrome.storage.session.set({ paused: true });
+      else { await chrome.storage.session.remove('paused'); rebuildAlarms(); }
+      return { ok: true };
+    case 'open-default-newtab':
+      // While paused the new tab shows Chrome's own page instead of ours.
+      if (!tab) return { ok: false };
+      await chrome.tabs.update(tab.id, { url: 'chrome://new-tab-page/' });
+      return { ok: true };
     case 'refocus':
       // Extension-initiated navigation gives the page keyboard focus (not the address bar).
-      if (tab) await chrome.tabs.update(tab.id, { url: ext(HOME_FOCUS) });
+      if (tab && !(await isPaused())) await chrome.tabs.update(tab.id, { url: ext(HOME_FOCUS) });
       return { ok: true };
     case 'save-video':
       return saved.saveVideo({ id: msg.id, title: msg.title, categoryId: msg.categoryId });

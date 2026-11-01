@@ -36,15 +36,35 @@ async function render() {
   if (first && !document.activeElement.closest?.('[data-nav]')) first.focus();
 }
 
-enableNav({ escapeGoesHome: false });
-chrome.runtime.sendMessage({ type: 'exit-fullscreen' }).catch(() => {});
-render();
-// Chrome sometimes leaves the address bar focused on start/new tab: re-navigate once
-// (extension-initiated navigation gives the page focus). f=1 prevents loops.
-setTimeout(() => {
-  if (document.visibilityState === 'visible' && !document.hasFocus() && !new URLSearchParams(location.search).has('f')) {
-    chrome.runtime.sendMessage({ type: 'refocus' }).catch(() => {});
+// Paused by the grandson: show Chrome's own new tab page (or a short note if that fails).
+async function handlePaused() {
+  const { paused } = await chrome.storage.session.get('paused').catch(() => ({}));
+  if (!paused) return false;
+  const r = await chrome.runtime.sendMessage({ type: 'open-default-newtab' }).catch(() => null);
+  if (!r || !r.ok) {
+    document.body.replaceChildren(
+      el('h1', { text: 'Помічник вимкнено до перезапуску Chrome' }),
+      el('div', { class: 'row' }, el('button', {
+        class: 'big accent',
+        onclick: async () => { await chrome.runtime.sendMessage({ type: 'set-paused', paused: false }); location.reload(); },
+      }, '▶ Увімкнути помічника')));
   }
-}, 400);
-setInterval(tick, 1000);
-chrome.storage.onChanged.addListener(() => render());
+  return true;
+}
+
+function start() {
+  enableNav({ escapeGoesHome: false });
+  chrome.runtime.sendMessage({ type: 'exit-fullscreen' }).catch(() => {});
+  render();
+  // Chrome sometimes leaves the address bar focused on start/new tab: re-navigate once
+  // (extension-initiated navigation gives the page focus). f=1 prevents loops.
+  setTimeout(() => {
+    if (document.visibilityState === 'visible' && !document.hasFocus() && !new URLSearchParams(location.search).has('f')) {
+      chrome.runtime.sendMessage({ type: 'refocus' }).catch(() => {});
+    }
+  }, 400);
+  setInterval(tick, 1000);
+  chrome.storage.onChanged.addListener(() => render());
+}
+
+handlePaused().then((paused) => { if (!paused) start(); });
