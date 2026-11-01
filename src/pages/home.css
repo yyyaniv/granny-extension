@@ -1,0 +1,18 @@
+header { text-align: center; margin-bottom: 24px; }
+.clock { font-size: 140px; font-weight: 800; line-height: 1; letter-spacing: 4px; }
+.date { font-size: 40px; margin-top: 8px; }
+.next { font-size: 36px; margin-top: 12px; color: #ffd400; min-height: 1.3em; }
+.tiles { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px; }
+.tiles .big { min-height: 150px; }
+.tiles .wide { grid-column: 1 / -1; min-height: 110px; }
+.topics { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; }
+.topics .big { flex-direction: column; gap: 6px; font-size: 32px; min-height: 130px; padding: 16px 12px; }
+.topics .big .icon { font-size: 48px; }
+@media (max-height: 800px) {
+  .clock { font-size: 96px; }
+  .date { font-size: 32px; }
+  .tiles { gap: 20px; }
+  .tiles .big { min-height: 100px; }
+  .tiles .wide { min-height: 90px; }
+  .topics .big { min-height: 110px; }
+}

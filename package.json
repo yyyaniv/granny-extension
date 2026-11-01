@@ -1,0 +1,12 @@
+{
+  "name": "granny-extension",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Chrome extension for grandmother (Ukrainian UI)",
+  "scripts": {
+    "test": "node --test",
+    "check": "node scripts/check-manifest.mjs",
+    "release": "node scripts/release.mjs"
+  }
+}

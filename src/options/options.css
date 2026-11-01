@@ -1,0 +1,25 @@
+body { font-family: "Segoe UI", Arial, sans-serif; font-size: 18px; max-width: 980px; margin: 0 auto; padding: 16px 24px 80px; color: #111; background: #f4f6f9; }
+header { position: sticky; top: 0; background: #f4f6f9; padding: 8px 0; z-index: 2; }
+h1 { margin: 0; font-size: 28px; }
+section { background: #fff; border-radius: 12px; padding: 16px 20px; margin: 16px 0; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
+h2 { margin-top: 0; font-size: 22px; }
+label { display: block; margin: 10px 0; font-weight: 600; }
+label.inline { display: inline-block; margin-right: 16px; font-weight: 400; }
+input[type=text], input:not([type]), input[type=time], input[type=number], select, textarea { display: block; width: 100%; font: inherit; padding: 6px 8px; margin-top: 4px; border: 1px solid #889; border-radius: 6px; }
+input[type=checkbox] { width: 18px; height: 18px; vertical-align: middle; }
+button, .filebtn { font: inherit; padding: 8px 14px; border-radius: 8px; border: 1px solid #556; background: #e8ecf3; cursor: pointer; display: inline-block; margin: 4px 6px 4px 0; font-weight: 400; }
+button.primary { background: #1a56db; color: #fff; border-color: #1a56db; }
+button.danger { color: #a00; }
+.status { min-height: 1.4em; font-weight: 700; color: #0a6b2b; }
+.status.error { color: #b00020; }
+.errors { color: #b00020; margin: 8px 0; }
+.row { display: flex; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid #dde; flex-wrap: wrap; }
+.row .grow { flex: 1; min-width: 200px; }
+.row.disabled { opacity: .55; }
+.check-result { flex-basis: 100%; padding: 6px 10px; background: #eef4ff; border-radius: 6px; }
+form { border: 2px solid #1a56db; border-radius: 10px; padding: 8px 16px; margin-top: 12px; }
+fieldset { border: 1px solid #aab; border-radius: 8px; }
+.tile-row, .topic-box { display: grid; grid-template-columns: 70px 1fr 2fr auto; gap: 8px; align-items: center; margin: 6px 0; }
+.topic-box { grid-template-columns: 70px 1fr 1fr; padding: 8px 0; border-bottom: 1px solid #dde; }
+.topic-box textarea { grid-column: 1 / -1; min-height: 160px; }
+.note { color: #556; font-size: 15px; }

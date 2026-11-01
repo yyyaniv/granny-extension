@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <title>Мої відео</title>
+  <link rel="stylesheet" href="common.css">
+  <link rel="stylesheet" href="saved.css">
+</head>
+<body>
+  <h1>⭐ Мої відео</h1>
+  <main id="main">
+    <section id="continue" hidden>
+      <h2>▶ Продовжити перегляд</h2>
+      <div id="history" class="cards"></div>
+    </section>
+    <section id="saved">
+      <h2>⭐ Збережені</h2>
+      <div id="cats" class="row cats"></div>
+      <div id="list" class="cards"></div>
+      <p id="empty" class="hint" hidden>Тут поки нічого немає.<br>Щоб зберегти відео, натисніть ⭐ Зберегти під час перегляду.</p>
+    </section>
+  </main>
+  <div id="confirm" class="stack center" hidden>
+    <div class="huge">Прибрати це відео?</div>
+    <div id="confirm-title" class="hint"></div>
+    <div class="row">
+      <button id="confirm-yes" class="big muted" data-nav>Так</button>
+      <button id="confirm-no" class="big accent" data-nav data-autofocus>Ні</button>
+    </div>
+  </div>
+  <div id="footer" class="footer"><a class="big muted small" href="home.html" data-nav>🏠 На головну</a></div>
+  <script type="module" src="saved.js"></script>
+</body>
+</html>

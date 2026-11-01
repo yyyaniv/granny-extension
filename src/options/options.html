@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <title>Налаштування — Бабусин помічник</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <header>
+    <h1>Налаштування (для онука)</h1>
+    <div id="status" class="status" role="status"></div>
+  </header>
+
+  <section>
+    <h2>Розклад трансляцій</h2>
+    <div id="schedule-list"></div>
+    <button id="add-entry" class="primary">+ Додати запис</button>
+    <form id="entry-form" hidden>
+      <h3 id="entry-title">Запис розкладу</h3>
+      <label>Назва для бабусі <input name="name" placeholder="Вервиця"></label>
+      <label>Тип джерела
+        <select name="type">
+          <option value="youtube-channel">Канал YouTube (шукати за ключовими словами)</option>
+          <option value="youtube-video">Відео YouTube (постійне посилання, напр. цілодобова трансляція)</option>
+          <option value="facebook-profile">Профіль Facebook</option>
+        </select>
+      </label>
+      <label>Посилання <input name="url" placeholder="https://www.youtube.com/@ugcctv"></label>
+      <label id="kw-label">Ключові слова з назви (кілька варіантів через «;»)
+        <input name="keywords" placeholder="ВЕРВИЦЯ ЄДНАЄ"></label>
+      <fieldset>
+        <legend>Дні тижня</legend>
+        <label class="inline"><input type="checkbox" id="everyday"> щодня</label>
+        <span id="days"></span>
+      </fieldset>
+      <label>Час початку <input name="time" type="time" required></label>
+      <label>Попередити за (хвилин) <input name="warnMinutes" type="number" min="0" max="120" value="3"></label>
+      <label class="inline"><input type="checkbox" name="enabled" checked> Увімкнено</label>
+      <div id="entry-errors" class="errors"></div>
+      <div class="buttons">
+        <button type="submit" class="primary">Зберегти запис</button>
+        <button type="button" id="cancel-entry">Скасувати</button>
+      </div>
+    </form>
+  </section>
+
+  <section>
+    <h2>Плитки на головній сторінці</h2>
+    <div id="tiles"></div>
+    <button id="add-tile">+ Додати плитку</button>
+  </section>
+
+  <section>
+    <h2>Теми (кнопки «Рецепти», «Город», «Здоров'я», «Історії»)</h2>
+    <p class="note">Фрази — по одній на рядок; щоразу показуються 5 випадкових (чим більше фраз, тим різноманітніше).</p>
+    <div id="topics"></div>
+  </section>
+
+  <section>
+    <h2>Збережені відео</h2>
+    <p class="note">Відео, які бабуся зберегла кнопкою «⭐ Зберегти», лежать у закладках Chrome, у теці «Бабусині відео». Підтеки — це категорії.</p>
+    <div id="saved-cats"></div>
+    <label>Нова категорія <input id="cat-name" placeholder="Наприклад: Молитви"></label>
+    <div class="buttons">
+      <button id="cat-add" class="primary">+ Створити категорію</button>
+      <button id="cat-open">Відкрити теку в закладках Chrome</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Загальне</h2>
+    <label class="inline"><input type="checkbox" id="hideShorts"> Ховати Shorts і коментарі на YouTube</label>
+    <label class="inline"><input type="checkbox" id="fullscreen"> Відкривати трансляцію за розкладом на весь екран</label>
+  </section>
+
+  <section>
+    <h2>Звук оголошення</h2>
+    <p>Можна завантажити або записати коротке повідомлення голосом онука. Якщо нічого немає — лунає дзвіночок.</p>
+    <div class="buttons">
+      <label class="filebtn">Завантажити файл… <input type="file" id="audio-file" accept="audio/*" hidden></label>
+      <button id="audio-rec">● Записати</button>
+      <button id="audio-play">▶ Прослухати</button>
+      <button id="audio-del">Видалити</button>
+    </div>
+    <div id="audio-info"></div>
+  </section>
+
+  <section>
+    <h2>Мікрофон (одноразово)</h2>
+    <p>Потрібен для голосового пошуку бабусі. Натисніть кнопку і дозвольте доступ у вікні Chrome.</p>
+    <button id="mic-allow" class="primary">Дозволити мікрофон</button>
+    <div id="mic-info"></div>
+  </section>
+
+  <section>
+    <h2>Резервна копія</h2>
+    <div class="buttons">
+      <button id="export">Зберегти налаштування у файл</button>
+      <label class="filebtn">Завантажити з файлу… <input type="file" id="import-file" accept="application/json,.json" hidden></label>
+    </div>
+    <p class="note">Звук оголошення у файл не входить.</p>
+  </section>
+
+  <script type="module" src="options.js"></script>
+</body>
+</html>

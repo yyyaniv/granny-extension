@@ -1,0 +1,17 @@
+h2 { font-size: 40px; margin: 24px 0 16px; }
+main { max-width: 1280px; margin: 0 auto; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 24px; }
+.item { display: flex; flex-direction: column; gap: 10px; }
+.vcard {
+  display: block; text-decoration: none; color: #000; background: #fff;
+  border: 6px solid #fff; border-radius: 22px; padding: 10px; font-size: 24px; font-weight: 700; cursor: pointer;
+}
+.vcard img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 12px; display: block; margin-bottom: 8px; background: #ccc; }
+.vcard .t { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.vcard .sub { display: block; font-size: 22px; font-weight: 600; color: #7a4b00; margin-top: 4px; }
+.vcard:focus { outline: 12px solid #ffd400; outline-offset: 6px; background: #fff3a0; }
+.item .big { font-size: 24px; min-height: 0; padding: 8px 12px; border-radius: 16px; }
+.cats { margin: 0 0 24px; }
+.cats .big { font-size: 28px; min-height: 0; padding: 12px 22px; }
+#confirm { margin-top: 40px; }
+#confirm .row .big { min-width: 260px; }
