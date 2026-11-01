@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Бабусин помічник",
   "short_name": "Помічник",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Проста головна сторінка, розклад трансляцій, голосовий пошук і спрощений YouTube.",
   "permissions": ["storage", "alarms", "tabs", "bookmarks", "sidePanel"],
   "host_permissions": [
@@ -29,13 +29,13 @@
   "content_scripts": [
     {
       "matches": ["https://www.youtube.com/*"],
-      "js": ["src/content/yt-selectors.js", "src/content/youtube.js"],
+      "js": ["src/content/yt-selectors.js", "src/content/scroll.js", "src/content/youtube.js"],
       "css": ["src/content/youtube.css"],
       "run_at": "document_idle"
     },
     {
       "matches": ["https://www.facebook.com/*"],
-      "js": ["src/content/facebook.js"],
+      "js": ["src/content/scroll.js", "src/content/facebook.js"],
       "run_at": "document_idle"
     }
   ]

@@ -1,8 +1,11 @@
 * { box-sizing: border-box; }
+:root { --page: #fbf6ee; --ink: #1b1b1b; --bd: 4px solid #1b1b1b; --ring: #0047d4; }
+/* .stack/.row/... set display and would otherwise defeat the UA [hidden] rule */
+[hidden] { display: none !important; }
 html, body { margin: 0; min-height: 100%; }
 body {
-  background: #0d1b2a;
-  color: #ffffff;
+  background: var(--page);
+  color: var(--ink);
   font-family: "Segoe UI", Arial, sans-serif;
   font-size: 32px;
   line-height: 1.3;
@@ -17,22 +20,37 @@ h1 { font-size: 44px; margin: 0 0 24px; text-align: center; }
 .big {
   display: flex; align-items: center; justify-content: center; gap: 18px;
   font: inherit; font-size: 38px; font-weight: 700; text-align: center; text-decoration: none;
-  color: #000; background: #ffffff;
-  border: 6px solid #ffffff; border-radius: 28px;
+  color: var(--fg, var(--ink)); background: var(--bg, #ffffff);
+  border: var(--bd); border-radius: 28px;
   padding: 28px 32px; min-height: 130px; cursor: pointer;
 }
 .big .icon { font-size: 54px; }
-.big.accent { background: #ffd400; border-color: #ffd400; }
+.big.accent { --bg: #ffcf33; }
 .big.small { font-size: 32px; min-height: 90px; padding: 16px 24px; }
-.big.muted { background: #1b263b; color: #fff; border-color: #fff; }
-.big:hover { background: #fff3a0; }
-.big:focus { outline: 12px solid #ffd400; outline-offset: 6px; background: #fff3a0; transform: scale(1.03); }
-.big.accent:focus { outline-color: #ffffff; background: #ffe45c; }
-.big.muted:focus { background: #2d3f60; outline-color: #ffd400; }
+.big.muted { --bg: #e8dcc4; }
+/* per-service colours (white text >= 4.5:1, see tests/unit/styles.test.js) */
+.big.tile-youtube { --bg: #c62828; --fg: #ffffff; }
+.big.tile-facebook { --bg: #1565c0; --fg: #ffffff; }
+.big.tile-programs { --bg: #6a1b9a; --fg: #ffffff; }
+.big.tile-voice { --bg: #2e7d32; --fg: #ffffff; }
+.big.tile-saved { --bg: #ffb300; }
+.big.topic-recipes { --bg: #ffd7b5; }
+.big.topic-garden { --bg: #cdeccd; }
+.big.topic-health { --bg: #bfe3f5; }
+.big.topic-stories { --bg: #e6cff2; }
+/* same hover/focus everywhere: the button keeps its own colour */
+.big:hover, .vcard:hover { filter: brightness(0.93); }
+.big:focus, .vcard:focus { outline: 10px solid var(--ring); outline-offset: 6px; filter: brightness(0.93); transform: scale(1.03); }
 
-.hint { font-size: 28px; color: #cfe3ff; text-align: center; }
+.hint { font-size: 28px; color: #4a4a4a; text-align: center; }
 .huge { font-size: 64px; font-weight: 800; text-align: center; margin: 24px 0; word-break: break-word; }
 .msg { font-size: 36px; text-align: center; margin: 16px 0; min-height: 1.3em; }
-.msg.error { color: #ffb4a8; }
+.msg.error { color: #b3261e; }
 .footer { margin-top: 40px; display: flex; justify-content: center; }
 .footer .big { min-width: 360px; }
+
+/* floating scroll buttons (nav.js) reserve room so they never cover content */
+body.has-scrollbtns { padding-right: 230px; padding-bottom: 60px; }
+.scrollbtns { position: fixed; right: 24px; bottom: 24px; z-index: 50; display: flex; flex-direction: column; gap: 16px; }
+.scrollbtns .big { min-height: 0; font-size: 30px; padding: 14px 22px; border-radius: 22px; width: 180px; }
+@media (max-width: 900px) { body.has-scrollbtns { padding-right: 40px; padding-bottom: 220px; } }

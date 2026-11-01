@@ -24,12 +24,12 @@ function tile(icon, text, href, extra = '') {
 async function render() {
   cfg = await loadConfig();
   tiles.replaceChildren();
-  for (const t of cfg.tiles) tiles.append(tile(t.icon, t.name, t.url, 'accent'));
-  tiles.append(tile('🙏', 'Програми', 'programs.html'));
-  tiles.append(tile('🎤', 'Пошукати голосом', 'voice.html'));
-  tiles.append(tile('⭐', 'Мої відео', 'saved.html', 'wide'));
+  for (const t of cfg.tiles) tiles.append(tile(t.icon, t.name, t.url, `tile-${t.id}`));
+  tiles.append(tile('🙏', 'Програми', 'programs.html', 'tile-programs'));
+  tiles.append(tile('🎤', 'Пошукати голосом', 'voice.html', 'tile-voice'));
+  tiles.append(tile('⭐', 'Мої відео', 'saved.html', 'wide tile-saved'));
   const topics = el('div', { class: 'topics' });
-  for (const t of cfg.topics) topics.append(tile(t.icon, t.title, `topic.html?id=${encodeURIComponent(t.id)}`, 'muted'));
+  for (const t of cfg.topics) topics.append(tile(t.icon, t.title, `topic.html?id=${encodeURIComponent(t.id)}`, `muted topic-${t.id}`));
   tiles.append(topics);
   tick();
   const first = tiles.querySelector('[data-nav]');

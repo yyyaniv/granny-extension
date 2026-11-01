@@ -28,6 +28,8 @@ window.GrannySelectors = {
   liveBadge: '.ytp-live-badge',
   watchTitle: 'h1.ytd-watch-metadata, ytd-watch-metadata h1, #title h1',
   watchChannel: 'ytd-watch-metadata ytd-channel-name a, #owner ytd-channel-name a',
+  // Where the inline "save" button is inserted (first match wins): right under the player, above the title.
+  saveAnchors: ['ytd-watch-metadata', '#above-the-fold'],
   mainVideo: 'video.html5-main-video, #movie_player video',
   player: '#movie_player',
   adShowing: '.ad-showing',

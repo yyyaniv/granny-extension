@@ -1,6 +1,14 @@
 (() => {
   'use strict';
   const S = window.GrannySelectors;
+  const GS = window.GrannyScroll;
+  let lastStep = 0; // held arrow key: at most one card per ~300 ms
+  const stepOk = (e) => {
+    const now = performance.now();
+    if (!GS.allowStep(e.repeat, now, lastStep)) return false;
+    lastStep = now;
+    return true;
+  };
   let active = null;
   let overlay = null;
   let paused = false;
@@ -79,7 +87,7 @@
     active = card;
     if (card) {
       card.classList.add('granny-active');
-      if (scroll) card.scrollIntoView({ block, behavior: 'smooth' });
+      if (scroll) GS.intoView(card, block); // constant-speed, not the browser's easing
     }
   }
   function firstInViewport(cards) {
@@ -151,6 +159,18 @@
       setTimeout(paintSave, 2500);
     }
   }
+  // Inline under the player (never over its controls); fixed top-right only if no anchor exists.
+  function placeSaveButton() {
+    let anchor = null;
+    for (const sel of S.saveAnchors) { anchor = document.querySelector(sel); if (anchor) break; }
+    if (anchor) {
+      if (saveBtn.parentElement !== anchor || anchor.firstElementChild !== saveBtn) anchor.prepend(saveBtn);
+      saveBtn.classList.remove('granny-float');
+    } else {
+      if (saveBtn.parentElement !== document.body) document.body.append(saveBtn);
+      saveBtn.classList.add('granny-float');
+    }
+  }
   function syncSaveButton() {
     const show = !paused && pageType() === 'watch' && !document.fullscreenElement;
     if (show && !saveBtn) {
@@ -158,12 +178,15 @@
       saveBtn.id = 'granny-save-btn';
       saveBtn.type = 'button';
       saveBtn.addEventListener('click', doSave);
-      document.body.append(saveBtn);
       paintSave();
     }
-    if (saveBtn) saveBtn.hidden = !show;
+    if (saveBtn) {
+      saveBtn.hidden = !show;
+      if (show) placeSaveButton(); // YouTube re-renders the page: re-attach when needed
+    }
     if (!show && active === saveBtn) setActive(null);
   }
+  setInterval(syncSaveButton, 1500);
 
   // Watch history: sent to the background (it uses the tested lib/history.js).
   function recordHistory() {
@@ -220,6 +243,7 @@
       if (!list.length) return;
       stop();
       if (f && f !== document.body) f.blur();
+      if (!stepOk(e)) return;
       let i = active ? list.indexOf(active) : -1;
       if (i < 0) i = e.key === 'ArrowDown' ? (list.length > 1 && list[0] === saveBtn ? 1 : 0) : 0;
       else i = Math.min(list.length - 1, Math.max(0, i + (e.key === 'ArrowDown' ? 1 : -1)));
@@ -341,7 +365,7 @@
     const move = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
     if (move) {
       e.preventDefault(); e.stopImmediatePropagation();
-      moveActive(move);
+      if (stepOk(e)) moveActive(move);
     } else if (e.key === 'Enter') {
       const focused = document.activeElement;
       const native = focused && focused !== document.body && focused.closest(S.nativeEnterZones);
