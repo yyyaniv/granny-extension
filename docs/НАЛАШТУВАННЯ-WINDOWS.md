@@ -93,7 +93,7 @@
 
 ### Одноразове налаштування (через Chrome Remote Desktop)
 1. Переконайтесь, що розширення вже підключене з теки `C:\Babusia\GrannyExtention` (розділ 1).
-2. Відкрийте PowerShell (звичайний, не від адміністратора) і вставте (замініть `yyyaniv/granny-extension` на свій репозиторій):
+2. Відкрийте PowerShell (звичайний, не від адміністратора) і вставте:
 ```
 irm https://raw.githubusercontent.com/yyyaniv/granny-extension/main/windows/install.ps1 -OutFile $env:TEMP\i.ps1; powershell -ExecutionPolicy Bypass -File $env:TEMP\i.ps1 -ZipUrl https://github.com/yyyaniv/granny-extension/releases/latest/download/BabusynPomichnyk.zip
 ```
