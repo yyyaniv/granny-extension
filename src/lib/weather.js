@@ -2,7 +2,7 @@
 
 const DAYS = ['неділя', 'понеділок', 'вівторок', 'середа', 'четвер', 'пʼятниця', 'субота'];
 
-export function forecastUrl(lat, lon, days = 4) {
+export function forecastUrl(lat, lon, days = 7) {
   const p = new URLSearchParams({
     latitude: String(lat), longitude: String(lon),
     current: 'temperature_2m,apparent_temperature,weather_code,wind_speed_10m',

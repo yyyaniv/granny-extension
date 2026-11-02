@@ -6,14 +6,16 @@
   <link rel="stylesheet" href="common.css">
   <link rel="stylesheet" href="weather.css">
 </head>
-<body>
-  <h1 id="heading">Погода</h1>
-  <main id="content">
+<body class="weather-page">
+  <aside class="left">
+    <h1 id="heading">Погода</h1>
     <section id="now" class="now"></section>
+    <a class="big muted small" href="home.html" data-nav data-autofocus>🏠 На головну</a>
+  </aside>
+  <main id="content" class="right">
     <section id="days" class="days"></section>
     <p id="msg" class="msg" hidden></p>
   </main>
-  <div class="footer"><a class="big muted small" href="home.html" data-nav data-autofocus>🏠 На головну</a></div>
   <script type="module" src="weather.js"></script>
 </body>
 </html>

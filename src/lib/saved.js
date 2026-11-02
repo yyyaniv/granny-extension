@@ -1,4 +1,5 @@
-// Saved videos live in a Chrome bookmarks folder «Бабусині відео»; subfolders are categories.
+// Saved videos and websites live in a Chrome bookmarks folder «Бабусині відео»; subfolders are categories.
+// Every bookmark has a key: the YouTube video id, or (any other site) the page URL without #hash.
 // Pure helpers come first; chrome.bookmarks code is below (call only from extension contexts).
 
 export const FOLDER_TITLE = 'Бабусині відео';
@@ -27,7 +28,23 @@ export function normalizeVideoUrl(url) {
   return id ? watchUrl(id) : null;
 }
 
-/** "Назва - YouTube" -> "Назва" (also drops the "(3) " notification counter). */
+/** Bookmark key: YouTube video id, else the http(s) URL without #hash, else null. */
+export function pageKey(url) {
+  const id = videoIdFromUrl(url);
+  if (id) return id;
+  let u;
+  try { u = new URL(String(url)); } catch { return null; }
+  if (u.protocol !== 'https:' && u.protocol !== 'http:') return null;
+  u.hash = '';
+  return u.href;
+}
+
+/** "www.uprava.lviv.ua" -> "uprava.lviv.ua" (shown on site cards). */
+export function siteName(url) {
+  try { return new URL(String(url)).hostname.replace(/^www\./, ''); } catch { return ''; }
+}
+
+/** "Назва - YouTube" (also drops the "(3) " notification counter). */
 export function cleanTabTitle(title) {
   return String(title || '').replace(/^\(\d+\)\s*/, '').replace(/\s+-\s+YouTube$/, '').trim() || 'Відео';
 }
@@ -39,12 +56,16 @@ export function pickOtherBookmarksId(rootChildren) {
   return hit ? hit.id : null;
 }
 
-const toItem = (b) => ({ bookmarkId: b.id, id: videoIdFromUrl(b.url), title: b.title || 'Відео', dateAdded: b.dateAdded || 0 });
+// id: video id (null for websites); key: see pageKey().
+const toItem = (b) => {
+  const id = videoIdFromUrl(b.url);
+  return { bookmarkId: b.id, id, key: pageKey(b.url), url: b.url, title: b.title || (id ? 'Відео' : siteName(b.url) || 'Сайт'), dateAdded: b.dateAdded || 0 };
+};
 const newestFirst = (a, b) => b.dateAdded - a.dateAdded;
 
 function collect(node, out = []) {
   for (const c of node.children || []) {
-    if (c.url) { const it = toItem(c); if (it.id) out.push(it); } else collect(c, out);
+    if (c.url) { const it = toItem(c); if (it.key) out.push(it); } else collect(c, out);
   }
   return out;
 }
@@ -54,19 +75,19 @@ export function groupSaved(folder) {
   const categories = [];
   const uncategorized = [];
   for (const c of (folder && folder.children) || []) {
-    if (c.url) { const it = toItem(c); if (it.id) uncategorized.push(it); } else {
+    if (c.url) { const it = toItem(c); if (it.key) uncategorized.push(it); } else {
       categories.push({ id: c.id, title: c.title, items: collect(c).sort(newestFirst) });
     }
   }
   return { categories, uncategorized: uncategorized.sort(newestFirst) };
 }
 
-/** All bookmark nodes in the folder tree that hold this video. */
-export function findVideoNodes(folder, id) {
+/** All bookmark nodes in the folder tree with this key (video id or page URL). */
+export function findVideoNodes(folder, key) {
   const out = [];
   const walk = (n) => {
     for (const c of n.children || []) {
-      if (c.url) { if (videoIdFromUrl(c.url) === id) out.push(c); } else walk(c);
+      if (c.url) { if (pageKey(c.url) === key) out.push(c); } else walk(c);
     }
   };
   if (folder) walk(folder);
@@ -111,8 +132,8 @@ export async function listSaved() {
   return { folderId: tree.id, ...groupSaved(tree) };
 }
 
-export async function isSaved(id) {
-  return findVideoNodes(await folderTree(), id).length > 0;
+export async function isSaved(key) {
+  return findVideoNodes(await folderTree(), key).length > 0;
 }
 
 /** -> {status:'saved'|'exists'} */
@@ -131,6 +152,18 @@ export async function saveVideo({ id, title, categoryId }) {
   return { status: 'saved' };
 }
 
+/** Any website (YouTube videos go through saveVideo). -> {status:'saved'|'exists'} */
+export async function savePage({ url, title, categoryId }) {
+  const id = videoIdFromUrl(url);
+  if (id) return saveVideo({ id, title, categoryId });
+  const key = pageKey(url);
+  if (!key) throw new Error('Цю сторінку не можна зберегти');
+  if (await isSaved(key)) return { status: 'exists' };
+  await chrome.bookmarks.create({ parentId: await getFolderId(true), title: String(title || siteName(key) || 'Сайт').trim(), url: key });
+  return { status: 'saved' };
+}
+
+/** key: video id or page URL (pageKey). */
 export async function removeVideo(id) {
   const nodes = findVideoNodes(await folderTree(), id);
   for (const n of nodes) await chrome.bookmarks.remove(n.id);

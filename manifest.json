@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Бабусин помічник",
   "short_name": "Помічник",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Проста головна сторінка, розклад трансляцій, голосовий пошук, новини, погода і спрощений YouTube.",
   "permissions": ["storage", "alarms", "tabs", "bookmarks", "sidePanel"],
   "host_permissions": [

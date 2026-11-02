@@ -5,12 +5,12 @@ const FRESH = 30 * 60000;
 const STALE = 6 * 3600000;
 
 export async function getWeather({ lat, lon }) {
-  const key = `${lat},${lon}`;
+  const key = `${lat},${lon},7`; // ,7 = a week (older caches held 4 days)
   const { weatherCache: c } = await chrome.storage.local.get('weatherCache');
   const now = Date.now();
   if (c && c.key === key && now - c.at < FRESH) return c.data;
   try {
-    const res = await fetch(forecastUrl(lat, lon), { cache: 'no-store' });
+    const res = await fetch(forecastUrl(lat, lon, 7), { cache: 'no-store' });
     if (!res.ok) throw new Error(String(res.status));
     const data = summarize(await res.json());
     if (!data) throw new Error('bad data');

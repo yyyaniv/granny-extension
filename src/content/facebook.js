@@ -28,7 +28,7 @@
     style.textContent = `
       #granny-fb-nav { position: fixed; right: 16px; top: 50%; transform: translateY(-50%); z-index: 2147483000; display: flex; flex-direction: column; gap: 16px; }
       #granny-fb-nav[hidden] { display: none !important; }
-      #granny-fb-nav button { width: 190px; font: 700 26px "Segoe UI", Arial, sans-serif; line-height: 1.2; color: #1b1b1b; background: #ffcf33; border: 4px solid #1b1b1b; border-radius: 22px; padding: 16px 12px; cursor: pointer; }
+      #granny-fb-nav button { width: 190px; font: 700 26px "Segoe UI", Arial, sans-serif; line-height: 1.2; color: #1b1b1b; background: #8fd3c7; border: 4px solid #1b1b1b; border-radius: 22px; padding: 16px 12px; cursor: pointer; }
       #granny-fb-nav button:hover { filter: brightness(0.93); }
       #granny-fb-nav button:focus { outline: 10px solid #0047d4; outline-offset: 6px; filter: brightness(0.93); }`;
     box = document.createElement('div');
@@ -80,7 +80,7 @@
     t.textContent = 'Трансляція має бути вгорі сторінки. Натисніть на неї.';
     const b = document.createElement('button');
     b.textContent = '🏠 На головну';
-    b.style.cssText = 'margin-top:16px;font:700 34px "Segoe UI",Arial,sans-serif;padding:14px 40px;border-radius:20px;border:4px solid #1b1b1b;background:#ffcf33;color:#1b1b1b;cursor:pointer;outline:10px solid #0047d4;outline-offset:6px;';
+    b.style.cssText = 'margin-top:16px;font:700 34px "Segoe UI",Arial,sans-serif;padding:14px 40px;border-radius:20px;border:4px solid #1b1b1b;background:#8fd3c7;color:#1b1b1b;cursor:pointer;outline:10px solid #0047d4;outline-offset:6px;';
     b.addEventListener('click', () => chrome.runtime.sendMessage({ type: 'go-home' }));
     overlay.append(t, b);
     document.body.append(overlay);

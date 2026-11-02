@@ -159,8 +159,15 @@
       setTimeout(paintSave, 2500);
     }
   }
-  // Inline under the player (never over its controls); fixed top-right only if no anchor exists.
+  // Bottom-left next to "◀ Назад до помічника" (homebtn.js slot); else inline under the player
+  // (never over its controls); fixed top-right only if neither exists.
   function placeSaveButton() {
+    const corner = document.getElementById('granny-home-nav');
+    if (corner) {
+      if (saveBtn.parentElement !== corner) corner.append(saveBtn);
+      saveBtn.classList.remove('granny-float');
+      return;
+    }
     let anchor = null;
     for (const sel of S.saveAnchors) { anchor = document.querySelector(sel); if (anchor) break; }
     if (anchor) {

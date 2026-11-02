@@ -1,4 +1,4 @@
-import { saveVideo, videoIdFromUrl, cleanTabTitle } from '../lib/saved.js';
+import { savePage, videoIdFromUrl, pageKey, cleanTabTitle } from '../lib/saved.js';
 import { resumeSeconds, resumeUrl, formatPosition } from '../lib/history.js';
 import { enableNav, el } from './nav.js';
 
@@ -12,17 +12,17 @@ async function activeTab() {
 
 async function refreshState() {
   const tab = await activeTab();
-  const id = tab && videoIdFromUrl(tab.url);
-  $('save').disabled = !id;
-  msg(id ? '' : 'Відкрийте відео на YouTube');
+  const key = tab && pageKey(tab.url);
+  $('save').disabled = !key;
+  $('save').textContent = tab && videoIdFromUrl(tab.url) ? '⭐ Зберегти це відео' : '⭐ Зберегти цю сторінку';
+  msg(key ? '' : 'Відкрийте відео або сайт');
 }
 
 $('save').addEventListener('click', async () => {
   const tab = await activeTab();
-  const id = tab && videoIdFromUrl(tab.url);
-  if (!id) return msg('Відкрийте відео на YouTube');
+  if (!tab || !pageKey(tab.url)) return msg('Відкрийте відео або сайт');
   try {
-    const r = await saveVideo({ id, title: cleanTabTitle(tab.title) });
+    const r = await savePage({ url: tab.url, title: videoIdFromUrl(tab.url) ? cleanTabTitle(tab.title) : tab.title });
     msg(r.status === 'exists' ? 'Вже збережено ✓' : 'Збережено ✓');
   } catch {
     msg('Не вдалося зберегти', true);

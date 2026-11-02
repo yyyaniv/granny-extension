@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <title>Календар</title>
+  <link rel="stylesheet" href="common.css">
+  <link rel="stylesheet" href="calendar.css">
+</head>
+<body class="calendar-page">
+  <aside class="left">
+    <section id="detail" class="detail" aria-live="polite"></section>
+    <a class="big muted small" href="home.html" data-nav>🏠 На головну</a>
+  </aside>
+  <main class="right">
+    <div class="month-bar">
+      <button id="prev" class="big muted small" data-nav aria-label="Попередній місяць">◀</button>
+      <h1 id="month"></h1>
+      <button id="next" class="big muted small" data-nav aria-label="Наступний місяць">▶</button>
+      <button id="view" class="big accent small" data-nav></button>
+    </div>
+    <div id="cal" class="cal">
+      <div class="dow"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Нд</span></div>
+      <div id="grid" class="grid-month"></div>
+      <p class="legend"><span class="sw fast"></span> піст · 🕯 свято · <span class="sw good"></span> добре сіяти · <span class="sw bad"></span> краще не сіяти</p>
+    </div>
+    <div id="list" class="list" hidden></div>
+  </main>
+  <script type="module" src="calendar.js"></script>
+</body>
+</html>

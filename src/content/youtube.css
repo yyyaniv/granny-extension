@@ -10,10 +10,12 @@
 }
 #granny-save-btn {
   display: block; margin: 12px 0; z-index: 5;
-  font: 700 28px "Segoe UI", Arial, sans-serif; color: #1b1b1b; background: #ffcf33;
+  font: 700 28px "Segoe UI", Arial, sans-serif; color: #1b1b1b; background: #f6a98e;
   border: 4px solid #1b1b1b; border-radius: 18px; padding: 12px 26px; cursor: pointer;
 }
-/* fallback when the watch-page anchor is not found: top-right under the masthead, never over the player controls */
+/* in the bottom-left corner box next to "◀ Назад до помічника" (homebtn.js): same size as that button */
+#granny-home-nav > #granny-save-btn { margin: 0; font-size: 26px; line-height: 1.2; padding: 12px 20px; border-radius: 20px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35); }
+/* fallback when the corner box and the watch-page anchor is not found: top-right under the masthead, never over the player controls */
 #granny-save-btn.granny-float { position: fixed; top: 72px; right: 16px; margin: 0; z-index: 2147483000; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35); }
 #granny-save-btn.granny-active { position: relative !important; }
 #granny-save-btn.granny-float.granny-active { position: fixed !important; z-index: 2147483000; }
@@ -38,7 +40,7 @@
 }
 #granny-end-overlay .granny-actions { display: flex; gap: 22px; }
 #granny-end-overlay .granny-home, #granny-end-overlay .granny-save {
-  font: inherit; font-size: 28px; font-weight: 700; color: #1b1b1b; background: #ffcf33;
+  font: inherit; font-size: 28px; font-weight: 700; color: #1b1b1b; background: #f6a98e;
   border: 4px solid #1b1b1b; border-radius: 18px; padding: 10px 32px; cursor: pointer;
 }
 #granny-end-overlay .granny-home { background: #e8dcc4; }
@@ -53,7 +55,7 @@
   border: 4px solid #1b1b1b; border-radius: 20px; padding: 10px 14px 10px 22px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
 }
 #granny-resume button {
-  font: inherit; font-size: 26px; color: #1b1b1b; background: #ffcf33;
+  font: inherit; font-size: 26px; color: #1b1b1b; background: #8fd3c7;
   border: 4px solid #1b1b1b; border-radius: 16px; padding: 8px 18px; cursor: pointer;
 }
 #granny-resume button:focus { outline: 8px solid #0047d4; outline-offset: 4px; }

@@ -2,6 +2,7 @@
 
 export const ALL_DAYS = [1, 2, 3, 4, 5, 6, 0];
 export const ENTRY_TYPES = ['youtube-channel', 'youtube-video', 'facebook-profile'];
+export const CHURCH_STYLES = ['new', 'old', 'off'];
 
 let counter = 0;
 export function newId(prefix = 'id') {
@@ -138,6 +139,7 @@ export function defaultConfig() {
     weather: defaultWeather(),
     hideShortsComments: true,
     fullscreenOnStream: true,
+    church: 'new',
   };
 }
 
@@ -199,6 +201,8 @@ export function normalizeConfig(raw) {
     weather: normWeather(r.weather),
     hideShortsComments: r.hideShortsComments !== false,
     fullscreenOnStream: r.fullscreenOnStream !== false,
+    // church holidays on the home page: 'new' (OCU/UGCC since 2023), 'old' (Julian) or 'off'
+    church: CHURCH_STYLES.includes(r.church) ? r.church : 'new',
   };
 }
 

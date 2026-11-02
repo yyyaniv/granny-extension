@@ -6,14 +6,20 @@
   <link rel="stylesheet" href="common.css">
   <link rel="stylesheet" href="home.css">
 </head>
-<body>
-  <header>
+<body class="home">
+  <header class="top">
     <div id="clock" class="clock">--:--</div>
-    <div id="date" class="date"></div>
-    <a id="weather" class="weather" href="weather.html" data-nav hidden></a>
-    <div id="next" class="next"></div>
+    <div class="info">
+      <div id="date" class="date"></div>
+      <div id="weather" class="weather" hidden></div>
+      <div id="feast" class="feast" hidden></div>
+      <div id="next" class="next"></div>
+    </div>
   </header>
-  <main id="tiles" class="tiles"></main>
+  <main class="board">
+    <div id="tiles" class="tiles"></div>
+    <div id="topics" class="topics"></div>
+  </main>
   <script type="module" src="home.js"></script>
 </body>
 </html>

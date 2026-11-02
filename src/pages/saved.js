@@ -1,4 +1,4 @@
-import { listSaved, removeVideo } from '../lib/saved.js';
+import { listSaved, removeVideo, siteName } from '../lib/saved.js';
 import { resumeSeconds, resumeUrl, formatPosition, positionFor } from '../lib/history.js';
 import { enableNav, enableScrollButtons, el, focusItem, animateScrollTo, goHome } from './nav.js';
 
@@ -15,6 +15,14 @@ function card(id, title, href, sub) {
     el('img', { src: thumb(id), alt: '', loading: 'lazy' }),
     el('span', { class: 't', text: title }),
     ...(sub ? [el('span', { class: 'sub', text: sub })] : []));
+}
+
+// Saved website (not a YouTube video): a big globe instead of a thumbnail, the site's name under the title.
+function siteCard(v) {
+  return el('a', { class: 'vcard site', href: v.url, 'data-nav': true },
+    el('span', { class: 'globe', text: '🌐' }),
+    el('span', { class: 't', text: v.title }),
+    el('span', { class: 'sub', text: siteName(v.url) }));
 }
 
 function renderHistory(history) {
@@ -78,10 +86,13 @@ function renderSaved(history) {
   const list = $('list');
   const shown = visibleItems();
   list.replaceChildren(...shown.map((v) => {
-    const pos = positionFor(v.id, history, positions);
-    const s = resumeSeconds(pos);
-    return el('div', { class: 'item' },
-      card(v.id, v.title, resumeUrl(pos), s > 0 ? `зупинились на ${formatPosition(s)}` : ''),
+    let c;
+    if (v.id) {
+      const pos = positionFor(v.id, history, positions);
+      const s = resumeSeconds(pos);
+      c = card(v.id, v.title, resumeUrl(pos), s > 0 ? `зупинились на ${formatPosition(s)}` : '');
+    } else c = siteCard(v);
+    return el('div', { class: 'item' }, c,
       el('button', { class: 'big muted small', 'data-nav': true, onclick: (e) => ask(v, e.currentTarget) }, '🗑 Прибрати'));
   }));
   $('empty').hidden = uncategorized.length > 0 || categories.some((c) => c.items.length);
@@ -113,7 +124,7 @@ $('confirm-no').addEventListener('click', cancel);
 $('confirm-yes').addEventListener('click', async () => {
   const p = pending;
   pending = null;
-  if (p) await removeVideo(p.video.id).catch(() => {});
+  if (p) await removeVideo(p.video.key).catch(() => {});
   setConfirm(false);
   window.scrollTo(0, p ? p.y : 0);
   await load();

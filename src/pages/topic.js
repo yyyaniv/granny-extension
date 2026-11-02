@@ -32,7 +32,7 @@ async function init() {
   function draw() {
     shown = pickRandom(topic.items, SHOWN, Math.random, shown);
     const links = shown.map((item, i) => el('a', {
-      class: 'big accent',
+      class: `big accent topic-${topic.id}`, // the topic's own colour (accent for custom topics)
       href: buildYoutubeSearchUrl(buildTopicQuery(topic.prefix, item)),
       'data-nav': true,
       ...(i === 0 ? { 'data-autofocus': true } : {}),

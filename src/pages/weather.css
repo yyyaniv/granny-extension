@@ -1,16 +1,25 @@
-.now { display: flex; align-items: center; justify-content: center; gap: 40px; flex-wrap: wrap; max-width: 1200px; margin: 0 auto 32px; }
-.now .icon { font-size: 150px; line-height: 1; }
-.now .temp { font-size: 140px; font-weight: 800; line-height: 1; }
-.now .text { font-size: 44px; font-weight: 700; }
-.now .sub { font-size: 32px; color: #4a4a4a; }
-.days { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto; }
-.day { background: #fff; border: var(--bd); border-radius: 28px; padding: 20px; text-align: center; }
-.day .name { font-size: 34px; font-weight: 800; }
-.day .icon { font-size: 80px; line-height: 1.2; }
-.day .range { font-size: 40px; font-weight: 800; }
-.day .text, .day .rain { font-size: 28px; }
-@media (max-height: 800px) {
-  .now .icon { font-size: 100px; }
-  .now .temp { font-size: 96px; }
-  .day .icon { font-size: 56px; }
+/* A week on one screen: "now" and the home button on the left, 7 day rows on the right. */
+body.weather-page { height: 100vh; display: grid; grid-template-columns: minmax(300px, 1fr) 2fr; gap: 32px; padding: 20px 32px; }
+.left { min-height: 0; padding: 0 18px 20px; display: flex; flex-direction: column; justify-content: space-between; gap: 16px; text-align: center; }
+.left h1 { font-size: clamp(32px, 6vh, 48px); margin: 0; }
+.now .icon { font-size: clamp(80px, 18vh, 160px); line-height: 1; }
+.now .temp { font-size: clamp(72px, 16vh, 140px); font-weight: 800; line-height: 1; }
+.now .text { font-size: clamp(30px, 5.4vh, 46px); font-weight: 700; }
+.now .sub { font-size: clamp(22px, 3.8vh, 32px); color: #4a4a4a; }
+.right { min-height: 0; }
+.days { height: 100%; display: grid; grid-auto-rows: 1fr; gap: 8px; }
+.day {
+  display: grid; grid-template-columns: 1.4fr 0.6fr 1.6fr 1.6fr 1.2fr; align-items: center; gap: 12px;
+  background: #fff; border: var(--bd); border-radius: 20px; padding: 0 20px; font-size: clamp(22px, 4.4vh, 36px); line-height: 1.1;
+}
+.day:first-child { background: #e3eeea; }
+.day .name { font-weight: 800; }
+.day .icon { font-size: 1.3em; line-height: 1; text-align: center; }
+.day .range { font-weight: 800; white-space: nowrap; }
+.day .rain { font-size: 0.85em; white-space: nowrap; }
+@media (max-width: 900px) {
+  body.weather-page { height: auto; grid-template-columns: 1fr; }
+  .days { grid-auto-rows: auto; }
+  .day { grid-template-columns: 1fr auto 1fr; padding: 10px 16px; }
+  .day .text, .day .rain { grid-column: 1 / -1; }
 }

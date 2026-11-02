@@ -27,7 +27,7 @@ test('all button colour pairs meet WCAG AA (4.5:1)', () => {
   const ink = /--ink:\s*(#[0-9a-f]{6})/i.exec(common)[1];
   const page = /--page:\s*(#[0-9a-f]{6})/i.exec(common)[1];
   assert.ok(ratio(ink, page) >= 4.5);
-  assert.ok(ratio('#4a4a4a', page) >= 4.5 && ratio('#b3261e', page) >= 4.5 && ratio('#8a3b00', page) >= 4.5);
+  assert.ok(ratio('#4a4a4a', page) >= 4.5 && ratio('#b3261e', page) >= 4.5 && ratio('#8a3b00', page) >= 4.5 && ratio('#6a1b9a', page) >= 4.5);
   let n = 0;
   for (const m of common.matchAll(/\.big[.\w-]*\s*\{\s*--bg:\s*(#[0-9a-f]{6});(?:\s*--fg:\s*(#[0-9a-f]{6});)?/gi)) {
     n++;

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { updateHistory, resumeSeconds, resumeUrl, formatPosition, HISTORY_MAX, updatePositions, positionFor } from '../../src/lib/history.js';
-import { videoIdFromUrl, normalizeVideoUrl, cleanTabTitle, pickOtherBookmarksId, groupSaved, findVideoNodes } from '../../src/lib/saved.js';
+import { videoIdFromUrl, normalizeVideoUrl, cleanTabTitle, pickOtherBookmarksId, groupSaved, findVideoNodes, pageKey, siteName } from '../../src/lib/saved.js';
 import { compareVersions, shouldReloadNow } from '../../src/lib/update.js';
 import { prevStart } from '../../src/lib/schedule.js';
 
@@ -99,12 +99,15 @@ const tree = bm('10', 'Бабусині відео', undefined, 0, [
     bm('15', 'Prayer 2', 'https://www.youtube.com/watch?v=ccccccccccc&t=3', 250),
     bm('16', 'Sub', undefined, 0, [bm('17', 'Deep', 'https://youtu.be/ddddddddddd', 10)]),
   ]),
-  bm('18', 'Not a video', 'https://example.com/', 5),
+  bm('18', 'A website', 'https://example.com/', 5),
+  bm('19', 'Not a page', 'javascript:alert(1)', 400),
 ]);
 
-test('groupSaved: categories, uncategorized, newest first, ignores non-videos', () => {
+test('groupSaved: categories, uncategorized, newest first, websites too, ignores non-http', () => {
   const g = groupSaved(tree);
-  assert.deepEqual(g.uncategorized.map((x) => x.id), ['aaaaaaaaaaa', ID]);
+  assert.deepEqual(g.uncategorized.map((x) => x.key), ['aaaaaaaaaaa', ID, 'https://example.com/']);
+  assert.deepEqual(g.uncategorized.map((x) => x.id), ['aaaaaaaaaaa', ID, null]);
+  assert.equal(g.uncategorized[2].url, 'https://example.com/');
   assert.equal(g.categories.length, 1);
   assert.equal(g.categories[0].title, 'Молитви');
   assert.deepEqual(g.categories[0].items.map((x) => x.id), ['ccccccccccc', 'bbbbbbbbbbb', 'ddddddddddd']);
@@ -116,6 +119,15 @@ test('findVideoNodes finds a video anywhere in the folder tree', () => {
   assert.equal(findVideoNodes(tree, ID).length, 1);
   assert.equal(findVideoNodes(tree, 'zzzzzzzzzzz').length, 0);
   assert.equal(findVideoNodes(null, ID).length, 0);
+  assert.deepEqual(findVideoNodes(tree, 'https://example.com/').map((n) => n.id), ['18']);
+});
+
+test('pageKey: video id for YouTube, URL without #hash for sites, null otherwise', () => {
+  assert.equal(pageKey(`https://youtu.be/${ID}`), ID);
+  assert.equal(pageKey('https://www.uprava.lviv.ua/news/1?x=2#top'), 'https://www.uprava.lviv.ua/news/1?x=2');
+  assert.equal(pageKey('chrome://settings/'), null);
+  assert.equal(pageKey('nonsense'), null);
+  assert.equal(siteName('https://www.ukr.net/news/'), 'ukr.net');
 });
 
 test('compareVersions', () => {

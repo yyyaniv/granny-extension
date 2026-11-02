@@ -25,7 +25,7 @@ h1 { font-size: 44px; margin: 0 0 24px; text-align: center; }
   padding: 28px 32px; min-height: 130px; cursor: pointer;
 }
 .big .icon { font-size: 54px; }
-.big.accent { --bg: #ffcf33; }
+.big.accent { --bg: #8fd3c7; }
 .big.small { font-size: 32px; min-height: 90px; padding: 16px 24px; }
 .big.muted { --bg: #e8dcc4; }
 /* per-service colours (white text >= 4.5:1, see tests/unit/styles.test.js) */
@@ -33,9 +33,10 @@ h1 { font-size: 44px; margin: 0 0 24px; text-align: center; }
 .big.tile-facebook { --bg: #1565c0; --fg: #ffffff; }
 .big.tile-programs { --bg: #6a1b9a; --fg: #ffffff; }
 .big.tile-voice { --bg: #2e7d32; --fg: #ffffff; }
-.big.tile-saved { --bg: #ffb300; }
+.big.tile-saved { --bg: #f6a98e; }
 .big.tile-news { --bg: #37474f; --fg: #ffffff; }
 .big.tile-weather { --bg: #bfe3f5; }
+.big.tile-calendar { --bg: #c5e6a6; }
 .big.topic-recipes { --bg: #ffd7b5; }
 .big.topic-garden { --bg: #cdeccd; }
 .big.topic-news { --bg: #d6dde4; }

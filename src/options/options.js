@@ -391,6 +391,7 @@ function renderAll() {
   renderWeather();
   $('hideShorts').checked = cfg.hideShortsComments;
   $('fullscreen').checked = cfg.fullscreenOnStream;
+  $('church').value = cfg.church;
 }
 
 async function init() {
@@ -402,6 +403,7 @@ async function init() {
   initBackup();
   initSaved();
   initWeather();
+  $('church').addEventListener('change', (e) => { cfg.church = e.target.value; persist(); });
   renderAll();
   // First run: store defaults so that background sees a config.
   const s = await chrome.storage.sync.get('cfg_schedule');

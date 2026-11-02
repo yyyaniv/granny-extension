@@ -26,6 +26,7 @@ export async function loadConfig() {
     weather: s.cfg_weather,
     hideShortsComments: flags.hideShortsComments,
     fullscreenOnStream: flags.fullscreenOnStream,
+    church: flags.church,
   });
 }
 
@@ -39,7 +40,7 @@ export async function saveConfig(cfg) {
     cfg_news: c.news,
     cfg_weather: c.weather,
     cfg_version: CONFIG_VERSION,
-    cfg_flags: { hideShortsComments: c.hideShortsComments, fullscreenOnStream: c.fullscreenOnStream },
+    cfg_flags: { hideShortsComments: c.hideShortsComments, fullscreenOnStream: c.fullscreenOnStream, church: c.church },
   });
   return c;
 }

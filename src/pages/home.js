@@ -4,14 +4,23 @@ import { formatTime, formatDateUk } from '../lib/datetime.js';
 import { enableNav, el } from './nav.js';
 import { getWeather } from './weather-data.js';
 import { shortLine } from '../lib/weather.js';
+import { feastNotice, feastLine, fastOn } from '../lib/church.js';
 
 const tiles = document.getElementById('tiles');
+const topics = document.getElementById('topics');
 let cfg = null;
 
 function tick() {
   const now = new Date();
   document.getElementById('clock').textContent = formatTime(now);
   document.getElementById('date').textContent = formatDateUk(now);
+  const feast = document.getElementById('feast');
+  // a feast (today / within 3 days) first, else today's fast
+  const fast = cfg && fastOn(now, cfg.church);
+  const line = cfg ? feastLine(feastNotice(now, cfg.church)) : '';
+  feast.textContent = line || (fast ? `Сьогодні: ${fast}` : '');
+  feast.classList.toggle('is-fast', !line && Boolean(fast));
+  feast.hidden = !feast.textContent;
   const next = cfg ? nextStartToday(cfg.schedule, now) : null;
   document.getElementById('next').textContent = next
     ? `Наступна: ${next.entry.name} о ${formatTime(next.time)}`
@@ -30,10 +39,10 @@ async function render() {
   tiles.append(tile('🙏', 'Програми', 'programs.html', 'tile-programs'));
   tiles.append(tile('🎤', 'Пошукати голосом', 'voice.html', 'tile-voice'));
   tiles.append(tile('📰', 'Читати новини', 'news.html', 'tile-news'));
-  tiles.append(tile('⭐', 'Мої відео', 'saved.html', 'tile-saved'));
-  const topics = el('div', { class: 'topics' });
-  for (const t of cfg.topics) topics.append(tile(t.icon, t.title, `topic.html?id=${encodeURIComponent(t.id)}`, `muted topic-${t.id}`));
-  tiles.append(topics);
+  if (cfg.weather.enabled) tiles.append(tile('🌤️', 'Погода на тиждень', 'weather.html', 'tile-weather'));
+  tiles.append(tile('⭐', 'Мої відео і сайти', 'saved.html', 'tile-saved'));
+  tiles.append(tile('📅', 'Календар', 'calendar.html', 'tile-calendar'));
+  topics.replaceChildren(...cfg.topics.map((t) => tile(t.icon, t.title, `topic.html?id=${encodeURIComponent(t.id)}`, `muted topic-${t.id}`)));
   tick();
   showWeather();
   const first = tiles.querySelector('[data-nav]');
@@ -46,6 +55,9 @@ async function showWeather() {
   const w = await getWeather(cfg.weather).catch(() => null);
   box.textContent = w ? `${shortLine(w)} · ${cfg.weather.city}` : '';
   box.hidden = !w;
+  // the tile shows today's sky: "☁️ Погода на тиждень"
+  const icon = tiles.querySelector('.tile-weather .icon');
+  if (icon && w) icon.textContent = w.now.icon;
 }
 
 // Paused by the grandson: show Chrome's own new tab page (or a short note if that fails).

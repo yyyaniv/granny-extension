@@ -27,7 +27,7 @@ async function init() {
     el('div', { class: 'icon', text: d.icon }),
     el('div', { class: 'range', text: `${formatTemp(d.min)} … ${formatTemp(d.max)}` }),
     el('div', { class: 'text', text: d.text }),
-    ...(d.rain != null && d.rain >= 30 ? [el('div', { class: 'rain', text: `☂️ опади: ${d.rain}%` })] : []))));
+    el('div', { class: 'rain', text: d.rain != null && d.rain >= 30 ? `☂️ ${d.rain}%` : '' }))));
 }
 
 enableNav();

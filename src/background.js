@@ -279,6 +279,12 @@ async function handle(msg, sender) {
       return { ok: true };
     case 'save-video':
       return saved.saveVideo({ id: msg.id, title: msg.title, categoryId: msg.categoryId });
+    case 'save-page':
+      return saved.savePage({ url: msg.url, title: msg.title });
+    case 'is-page-saved': {
+      const key = saved.pageKey(msg.url);
+      return { saved: Boolean(key) && (await saved.isSaved(key)) };
+    }
     case 'remove-video':
       return saved.removeVideo(msg.id);
     case 'list-saved':
