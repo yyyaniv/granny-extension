@@ -2,6 +2,8 @@ import { loadConfig } from '../lib/storage.js';
 import { nextStartToday } from '../lib/schedule.js';
 import { formatTime, formatDateUk } from '../lib/datetime.js';
 import { enableNav, el } from './nav.js';
+import { getWeather } from './weather-data.js';
+import { shortLine } from '../lib/weather.js';
 
 const tiles = document.getElementById('tiles');
 let cfg = null;
@@ -27,13 +29,23 @@ async function render() {
   for (const t of cfg.tiles) tiles.append(tile(t.icon, t.name, t.url, `tile-${t.id}`));
   tiles.append(tile('🙏', 'Програми', 'programs.html', 'tile-programs'));
   tiles.append(tile('🎤', 'Пошукати голосом', 'voice.html', 'tile-voice'));
-  tiles.append(tile('⭐', 'Мої відео', 'saved.html', 'wide tile-saved'));
+  tiles.append(tile('📰', 'Читати новини', 'news.html', 'tile-news'));
+  tiles.append(tile('⭐', 'Мої відео', 'saved.html', 'tile-saved'));
   const topics = el('div', { class: 'topics' });
   for (const t of cfg.topics) topics.append(tile(t.icon, t.title, `topic.html?id=${encodeURIComponent(t.id)}`, `muted topic-${t.id}`));
   tiles.append(topics);
   tick();
+  showWeather();
   const first = tiles.querySelector('[data-nav]');
   if (first && !document.activeElement.closest?.('[data-nav]')) first.focus();
+}
+
+async function showWeather() {
+  const box = document.getElementById('weather');
+  if (!cfg.weather.enabled) { box.hidden = true; return; }
+  const w = await getWeather(cfg.weather).catch(() => null);
+  box.textContent = w ? `${shortLine(w)} · ${cfg.weather.city}` : '';
+  box.hidden = !w;
 }
 
 // Paused by the grandson: show Chrome's own new tab page (or a short note if that fails).
@@ -64,6 +76,7 @@ function start() {
     }
   }, 400);
   setInterval(tick, 1000);
+  setInterval(showWeather, 15 * 60000);
   chrome.storage.onChanged.addListener(() => render());
 }
 

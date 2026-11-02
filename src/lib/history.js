@@ -29,6 +29,38 @@ export function updateHistory(list, entry, now) {
   return [next, ...prev.filter((x) => x.id !== entry.id)].slice(0, HISTORY_MAX);
 }
 
+export const POSITIONS_MAX = 500;
+
+/**
+ * Playback positions kept apart from the (short) history, so saved videos resume even
+ * after they dropped out of it. map: { [id]: { time, duration, updatedAt } }. Returns a new map.
+ */
+export function updatePositions(map, entry, now, max = POSITIONS_MAX) {
+  const prev = map && typeof map === 'object' ? map : {};
+  if (!entry || !entry.id || entry.live) return prev;
+  const t = Number(entry.time);
+  if (!Number.isFinite(t) || t < 0) return prev;
+  const old = prev[entry.id];
+  let time = Math.floor(t);
+  // same rule as the history: a fresh start must not wipe a saved position
+  if (time < 5 && old && Number(old.time) >= MIN_RESUME) time = Math.floor(old.time);
+  const d = Number(entry.duration);
+  const duration = Number.isFinite(d) && d > 0 ? Math.floor(d) : (old && old.duration) || undefined;
+  const next = { ...prev, [entry.id]: { time, ...(duration ? { duration } : {}), updatedAt: now } };
+  const ids = Object.keys(next);
+  if (ids.length <= max) return next;
+  ids.sort((a, b) => next[b].updatedAt - next[a].updatedAt);
+  return Object.fromEntries(ids.slice(0, max).map((id) => [id, next[id]]));
+}
+
+/** Best known position for a video: the newer of the history entry and the positions map. */
+export function positionFor(id, history, positions) {
+  const h = Array.isArray(history) ? history.find((x) => x && x.id === id) : null;
+  const p = positions && positions[id] ? { id, ...positions[id] } : null;
+  if (h && p) return (p.updatedAt || 0) > (h.updatedAt || 0) && !h.live ? p : h;
+  return h || p || { id };
+}
+
 /** Seconds to resume from, or 0 (start over). */
 export function resumeSeconds(entry) {
   if (!entry || entry.live) return 0;

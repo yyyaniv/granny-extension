@@ -1,11 +1,12 @@
 import { listSaved, removeVideo } from '../lib/saved.js';
-import { resumeSeconds, resumeUrl, formatPosition } from '../lib/history.js';
+import { resumeSeconds, resumeUrl, formatPosition, positionFor } from '../lib/history.js';
 import { enableNav, enableScrollButtons, el, focusItem, animateScrollTo, goHome } from './nav.js';
 
 const $ = (id) => document.getElementById(id);
 const MAX_HISTORY = 8;
 let data = { categories: [], uncategorized: [] };
 let filter = 'all'; // 'all' | 'none' | category id
+let positions = {};
 
 const thumb = (id) => `https://i.ytimg.com/vi/${id}/mqdefault.jpg`;
 
@@ -76,9 +77,13 @@ function renderSaved(history) {
   $('saved-title').textContent = cur ? `⭐ ${cur.title}` : filter === 'none' ? '⭐ Без категорії' : '⭐ Усі збережені';
   const list = $('list');
   const shown = visibleItems();
-  list.replaceChildren(...shown.map((v) => el('div', { class: 'item' },
-    card(v.id, v.title, resumeUrl(history.find((h) => h.id === v.id) || { id: v.id })),
-    el('button', { class: 'big muted small', 'data-nav': true, onclick: (e) => ask(v, e.currentTarget) }, '🗑 Прибрати'))));
+  list.replaceChildren(...shown.map((v) => {
+    const pos = positionFor(v.id, history, positions);
+    const s = resumeSeconds(pos);
+    return el('div', { class: 'item' },
+      card(v.id, v.title, resumeUrl(pos), s > 0 ? `зупинились на ${formatPosition(s)}` : ''),
+      el('button', { class: 'big muted small', 'data-nav': true, onclick: (e) => ask(v, e.currentTarget) }, '🗑 Прибрати'));
+  }));
   $('empty').hidden = uncategorized.length > 0 || categories.some((c) => c.items.length);
   renderSide(history);
 }
@@ -128,9 +133,10 @@ function focusInitial() {
 async function load() {
   const [saved, h] = await Promise.all([
     listSaved().catch(() => ({ categories: [], uncategorized: [] })),
-    chrome.storage.local.get('watchHistory'),
+    chrome.storage.local.get(['watchHistory', 'positions']),
   ]);
   data = saved;
+  positions = h.positions || {};
   const history = h.watchHistory || [];
   renderHistory(history);
   renderSaved(history);

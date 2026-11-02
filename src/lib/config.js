@@ -16,8 +16,8 @@ export function defaultTiles() {
   ];
 }
 
-// Schema version of stored config. 2 = bigger topic pools + «Історії» topic.
-export const CONFIG_VERSION = 2;
+// Schema version of stored config. 2 = bigger topic pools + «Історії» topic; 3 = «Новини» topic.
+export const CONFIG_VERSION = 3;
 
 // Topic lists shipped in 1.0.0 (kept to recognise untouched installs when migrating).
 const OLD_DEFAULT_ITEMS = {
@@ -44,6 +44,14 @@ export function defaultTopics() {
         'шкідники', 'колорадський жук', 'цибуля', 'часник', 'капуста',
         'морква', 'добрива', 'підживлення огірків', 'обрізка винограду', 'кабачки',
         'лунний календар', 'полуниця', 'обрізка яблуні', 'борошниста роса', 'квіти на клумбі', 'теплиця',
+      ],
+    },
+    {
+      id: 'news', icon: '📺', title: 'Новини', prefix: '',
+      items: [
+        'Еспресо новини', 'Суспільне новини', 'Українська правда новини', 'новини України сьогодні', 'Еспресо наживо',
+        'Суспільне Новини наживо', 'новини Львова', 'новини дня', 'підсумки дня', 'погода на тиждень',
+        'новини з фронту', 'головне за день', 'вечірні новини', 'ранкові новини', 'Еспресо ввечері',
       ],
     },
     {
@@ -89,11 +97,29 @@ export function migrateConfig(raw, fromVersion) {
     if (old && def && sameList(t.items, old)) { changed = true; return { ...t, items: [...def.items] }; }
     return t;
   });
-  if (!topics.some((t) => t && t.id === 'stories')) {
+  if (from < 2 && !topics.some((t) => t && t.id === 'stories')) {
     topics.push(fresh.find((d) => d.id === 'stories'));
     changed = true;
   }
+  if (!topics.some((t) => t && t.id === 'news')) {
+    // right after «Город» when it is there
+    const at = topics.findIndex((t) => t && t.id === 'garden');
+    topics.splice(at >= 0 ? at + 1 : topics.length, 0, fresh.find((d) => d.id === 'news'));
+    changed = true;
+  }
   return { config: { ...r, topics }, version: CONFIG_VERSION, changed };
+}
+
+export function defaultNews() {
+  return [
+    { id: 'espreso', name: 'Еспресо', icon: '☕', url: 'https://espreso.tv/rss' },
+    { id: 'pravda', name: 'Українська правда', icon: '📰', url: 'https://www.pravda.com.ua/rss/view_news/' },
+    { id: 'suspilne', name: 'Суспільне', icon: '📻', url: 'https://suspilne.media/rss/all.rss' },
+  ];
+}
+
+export function defaultWeather() {
+  return { city: 'Львів', lat: 49.838, lon: 24.023, enabled: true };
 }
 
 export function defaultSchedule() {
@@ -108,6 +134,8 @@ export function defaultConfig() {
     tiles: defaultTiles(),
     schedule: defaultSchedule(),
     topics: defaultTopics(),
+    news: defaultNews(),
+    weather: defaultWeather(),
     hideShortsComments: true,
     fullscreenOnStream: true,
   };
@@ -151,6 +179,15 @@ function normTopic(raw) {
   return { id: str(raw.id) || newId('c'), icon: str(raw.icon, '🔎') || '🔎', title: str(raw.title), prefix: str(raw.prefix), items };
 }
 
+function normWeather(raw) {
+  const d = defaultWeather();
+  if (!raw || typeof raw !== 'object') return d;
+  const lat = Number(raw.lat);
+  const lon = Number(raw.lon);
+  const ok = Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180 && str(raw.city);
+  return { ...(ok ? { city: str(raw.city), lat, lon } : { city: d.city, lat: d.lat, lon: d.lon }), enabled: raw.enabled !== false };
+}
+
 export function normalizeConfig(raw) {
   const r = raw && typeof raw === 'object' ? raw : {};
   const list = (v, fn, dflt) => (Array.isArray(v) ? v.map(fn).filter(Boolean) : dflt());
@@ -158,6 +195,8 @@ export function normalizeConfig(raw) {
     tiles: list(r.tiles, normTile, defaultTiles),
     schedule: list(r.schedule, normalizeEntry, defaultSchedule),
     topics: list(r.topics, normTopic, defaultTopics),
+    news: list(r.news, normTile, defaultNews),
+    weather: normWeather(r.weather),
     hideShortsComments: r.hideShortsComments !== false,
     fullscreenOnStream: r.fullscreenOnStream !== false,
   };

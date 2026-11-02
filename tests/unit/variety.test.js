@@ -49,16 +49,19 @@ const OLD = [
   { id: 'health', icon: '💊', title: "Здоров'я", prefix: "здоров'я", items: ['тиск', 'суглоби', 'народні засоби'] },
 ];
 
-test('default topics: 4 topics, big pools, stories has empty prefix', () => {
+test('default topics: 5 topics, big pools, stories and news have empty prefix', () => {
   const t = defaultTopics();
-  assert.deepEqual(t.map((x) => x.id), ['recipes', 'garden', 'health', 'stories']);
+  assert.deepEqual(t.map((x) => x.id), ['recipes', 'garden', 'news', 'health', 'stories']);
   for (const x of t) {
     assert.ok(x.items.length >= 15 && x.items.length <= 25, `${x.id}: ${x.items.length}`);
     assert.equal(new Set(x.items).size, x.items.length);
   }
-  assert.equal(t[3].prefix, '');
-  assert.equal(t[3].icon, '📖');
-  assert.equal(t[3].title, 'Історії');
+  assert.equal(t[4].prefix, '');
+  assert.equal(t[4].icon, '📖');
+  assert.equal(t[4].title, 'Історії');
+  assert.equal(t[2].prefix, '');
+  assert.equal(t[2].title, 'Новини');
+  assert.ok(['Еспресо', 'Суспільне', 'Українська правда'].every((n) => t[2].items.some((i) => i.includes(n))));
 });
 
 test('default topics fit the 8192-byte chrome.storage.sync item quota', () => {
@@ -67,12 +70,12 @@ test('default topics fit the 8192-byte chrome.storage.sync item quota', () => {
   assert.ok(Buffer.byteLength('cfg_topics' + JSON.stringify(defaultTopics()), 'utf8') < 7000);
 });
 
-test('migrate: old defaults upgraded, stories appended', () => {
+test('migrate: old defaults upgraded, news after garden, stories appended', () => {
   const { config, version, changed } = migrateConfig({ topics: OLD }, 1);
   const fresh = defaultTopics();
   assert.equal(version, CONFIG_VERSION);
   assert.equal(changed, true);
-  assert.deepEqual(config.topics.map((t) => t.id), ['recipes', 'garden', 'health', 'stories']);
+  assert.deepEqual(config.topics.map((t) => t.id), ['recipes', 'garden', 'news', 'health', 'stories']);
   for (const id of ['recipes', 'garden', 'health']) {
     assert.deepEqual(config.topics.find((t) => t.id === id).items, fresh.find((t) => t.id === id).items);
   }
@@ -89,10 +92,24 @@ test('migrate: customised topics untouched, stories still appended', () => {
   const { config } = migrateConfig({ topics: custom }, 1);
   assert.deepEqual(config.topics[0], custom[0]);
   assert.deepEqual(config.topics[1], custom[1]);
-  assert.deepEqual(config.topics[3], custom[3]);
-  assert.deepEqual(config.topics[2].items, defaultTopics()[2].items);
+  assert.equal(config.topics[2].id, 'news');
+  assert.deepEqual(config.topics[4], custom[3]);
+  assert.deepEqual(config.topics[3].items, defaultTopics().find((t) => t.id === 'health').items);
   assert.equal(config.topics.filter((t) => t.id === 'stories').length, 1);
-  assert.equal(config.topics.length, 5);
+  assert.equal(config.topics.length, 6);
+});
+
+test('migrate from 2: news added once, a deleted stories topic stays deleted', () => {
+  const v2 = defaultTopics().filter((t) => t.id !== 'news' && t.id !== 'stories');
+  const { config, changed } = migrateConfig({ topics: v2 }, 2);
+  assert.equal(changed, true);
+  assert.deepEqual(config.topics.map((t) => t.id), ['recipes', 'garden', 'news', 'health']);
+  const noGarden = migrateConfig({ topics: [v2[0]] }, 2).config.topics;
+  assert.deepEqual(noGarden.map((t) => t.id), ['recipes', 'news']);
+  const mine = { id: 'news', icon: '📰', title: 'Мої новини', prefix: '', items: ['x'] };
+  const kept = migrateConfig({ topics: [...v2, mine] }, 2);
+  assert.equal(kept.changed, false);
+  assert.deepEqual(kept.config.topics.filter((t) => t.id === 'news'), [mine]);
 });
 
 test('migrate: existing stories topic is kept as is', () => {

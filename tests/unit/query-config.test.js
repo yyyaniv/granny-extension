@@ -21,8 +21,10 @@ test('defaults', () => {
   const c = normalizeConfig(undefined);
   assert.equal(c.tiles.length, 2);
   assert.equal(c.tiles[0].url, 'https://www.youtube.com/');
-  assert.equal(c.topics.length, 4);
-  assert.deepEqual(c.topics.map((t) => t.id), ['recipes', 'garden', 'health', 'stories']);
+  assert.equal(c.topics.length, 5);
+  assert.deepEqual(c.topics.map((t) => t.id), ['recipes', 'garden', 'news', 'health', 'stories']);
+  assert.deepEqual(c.news.map((n) => n.id), ['espreso', 'pravda', 'suspilne']);
+  assert.equal(c.weather.city, 'Львів');
   assert.ok(c.topics[0].items.includes('борщ український'));
   assert.equal(c.topics[1].prefix, 'город');
   assert.equal(c.hideShortsComments, true);

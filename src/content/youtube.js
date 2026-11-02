@@ -376,6 +376,46 @@
     }
   }, true);
 
+  // ---------- resume where she stopped (videos opened without &t=, e.g. from recommendations) ----------
+  let resumeFor = null;
+  let resumeNote = null;
+  function hideResumeNote() { if (resumeNote) { resumeNote.remove(); resumeNote = null; } }
+  function showResumeNote(sec, video) {
+    hideResumeNote();
+    const fmt = (n) => { const h = Math.floor(n / 3600); const m = Math.floor((n % 3600) / 60); const ss = String(n % 60).padStart(2, '0'); return h ? `${h}:${String(m).padStart(2, '0')}:${ss}` : `${m}:${ss}`; };
+    resumeNote = document.createElement('div');
+    resumeNote.id = 'granny-resume';
+    const t = document.createElement('span');
+    t.textContent = `▶ Продовжуємо з ${fmt(sec)}`;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = '⏮ З початку';
+    b.addEventListener('click', () => { video.currentTime = 0; hideResumeNote(); });
+    resumeNote.append(t, b);
+    document.documentElement.append(resumeNote);
+    setTimeout(hideResumeNote, 10000);
+  }
+  async function maybeResume() {
+    if (paused || pageType() !== 'watch') return;
+    const id = currentId();
+    if (!id || id === resumeFor) return;
+    resumeFor = id;
+    const q = new URL(location.href).searchParams;
+    if (q.has('t') || q.has('start')) return; // an explicit time wins (saved cards already pass &t=)
+    const r = await ask({ type: 'get-resume', id });
+    const sec = r && r.seconds;
+    if (!sec) return;
+    for (let i = 0; i < 60 && currentId() === id; i++) { // wait for the player and any ad (up to ~30 s)
+      const v = document.querySelector(S.mainVideo);
+      const player = playerEl();
+      if (v && v.readyState >= 1 && !(player && player.matches(S.adShowing)) && Number.isFinite(v.duration)) {
+        if (v.currentTime < 5 && sec < v.duration - 5) { v.currentTime = sec; showResumeNote(sec, v); }
+        return;
+      }
+      await new Promise((res) => setTimeout(res, 500));
+    }
+  }
+
   // ---------- SPA navigation ----------
   window.addEventListener('yt-navigate-start', () => {
     recordHistory();
@@ -387,6 +427,8 @@
     syncSaveButton();
     refreshSaved();
     ensureActive();
+    if (currentId() !== resumeFor) hideResumeNote();
+    maybeResume();
   });
   // ---------- pause: the grandson can switch everything off until Chrome restarts ----------
   function setPaused(p) {
@@ -404,4 +446,5 @@
   syncSaveButton();
   refreshSaved();
   ensureActive();
+  maybeResume();
 })();

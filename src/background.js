@@ -1,6 +1,6 @@
 import { loadConfig, ensureMigrated } from './lib/storage.js';
 import * as saved from './lib/saved.js';
-import { updateHistory } from './lib/history.js';
+import { updateHistory, updatePositions, positionFor, resumeSeconds } from './lib/history.js';
 import { shouldReloadNow } from './lib/update.js';
 import { nextOccurrences, currentWindows } from './lib/schedule.js';
 import { resolveChannel } from './lib/resolve-channel.js';
@@ -226,8 +226,12 @@ async function exitFullscreen(windowId) {
 let historyQueue = Promise.resolve();
 function recordHistory(entry) {
   historyQueue = historyQueue.then(async () => {
-    const { watchHistory } = await chrome.storage.local.get('watchHistory');
-    await chrome.storage.local.set({ watchHistory: updateHistory(watchHistory, entry, Date.now()) });
+    const { watchHistory, positions } = await chrome.storage.local.get(['watchHistory', 'positions']);
+    const now = Date.now();
+    await chrome.storage.local.set({
+      watchHistory: updateHistory(watchHistory, entry, now),
+      positions: updatePositions(positions, entry, now),
+    });
   }).catch(() => {});
   return historyQueue;
 }
@@ -286,6 +290,11 @@ async function handle(msg, sender) {
     case 'record-history':
       await recordHistory(msg.entry);
       return { ok: true };
+    case 'get-resume': {
+      await historyQueue;
+      const { watchHistory, positions } = await chrome.storage.local.get(['watchHistory', 'positions']);
+      return { seconds: resumeSeconds(positionFor(msg.id, watchHistory, positions)) };
+    }
     case 'fb-check':
       return { scheduled: tab ? await fbScheduled(tab.id) : false };
     default:

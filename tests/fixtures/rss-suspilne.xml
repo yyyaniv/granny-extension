@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+  <channel>
+    <title><![CDATA[suspilne.news]]></title>
+    <link>https://suspilne.media/</link>
+    <atom:link href="https://suspilne.media/rss/all.rss" rel="self" type="application/rss+xml"></atom:link>
+    <description><![CDATA[]]></description>
+    <language>uk-UA</language>
+    <copyright>2023 All rights reserved</copyright>
+    <pubDate>Mon, 02 Nov 2026 00:16:54 +0200</pubDate>
+    <lastBuildDate>Mon, 02 Nov 2026 00:16:54 +0200</lastBuildDate>
+    <managingEditor>support.media@suspilne.media (Suspilne)</managingEditor>
+    <webMaster>support.media@suspilne.media (Suspilne)</webMaster>
+    <atom:link href="https://pubsubhubbub.appspot.com/" rel="hub" type="application/rss+xml"></atom:link>
+    <atom:link href="https://pubsubhubbub.superfeedr.com/" rel="hub" type="application/rss+xml"></atom:link>
+    <atom:link href="https://websubhub.com/hub" rel="hub" type="application/rss+xml"></atom:link>
+    <ttl>5</ttl>
+    <item>
+      <title><![CDATA[Найгарячіша ділянка — Покровська, бої за Костянтинівку. Фронт Донеччини та Луганщини 2 листопада 2026 року]]></title>
+      <link>https://suspilne.media/donbas/1441931-najgaracisa-dilanka-pokrovska-boi-za-kostantinivku-front-doneccini-ta-lugansini-2-listopada-2026-roku/</link>
+      <guid isPermaLink="true">https://suspilne.media/donbas/1441931-najgaracisa-dilanka-pokrovska-boi-za-kostantinivku-front-doneccini-ta-lugansini-2-listopada-2026-roku/</guid>
+      <description><![CDATA[Хроніка боїв на фронті в Донецькій та Луганській областях, дані Генштабу у листопаді 2026, мапа і ситуація на фронті, чи захопили Костянтинівку, що на Покровському напрямку, звільнення біля Лимана — фото, відео, коментарі з фронту]]></description>
+      <pubDate>Mon, 02 Nov 2026 00:16:54 +0200</pubDate>
+      <enclosure url="https://cdn4.suspilne.media/images/default.jpg" type="image/jpeg" length="12509"></enclosure>
+    </item>
+<item>
+      <title><![CDATA[Історичне «золото» України в дзюдо і старт футзалу: результати та медальний залік юнацької Олімпіади-2026 після 1-го дня]]></title>
+      <link>https://suspilne.media/sport/1442473-istoricne-zoloto-v-dzudo-i-start-futzalu-rezultati-ta-medalnij-zalik-unackoi-olimpiadi-2026-pisla-persogo-dna/</link>
+      <guid isPermaLink="true">https://suspilne.media/sport/1442473-istoricne-zoloto-v-dzudo-i-start-futzalu-rezultati-ta-medalnij-zalik-unackoi-olimpiadi-2026-pisla-persogo-dna/</guid>
+      <description><![CDATA[Збірна України розпочала виступи на Юнацьких олімпійських іграх-2026 у Дакарі із золотої медалі, збірна України у медальному заліку юнацької Олімпіади після першого дня змагань,]]></description>
+      <pubDate>Mon, 02 Nov 2026 00:02:46 +0200</pubDate>
+      <enclosure url="https://cdn4.suspilne.media/images/default.jpg" type="image/jpeg" length="13785"></enclosure>
+    </item>
+</channel>
+</rss>

@@ -1,5 +1,5 @@
 /* Same look as the extension pages: light cream, 4px dark border, blue focus ring. */
-[hidden]:is(#granny-save-btn, #granny-end-overlay, #granny-end-overlay *) { display: none !important; }
+[hidden]:is(#granny-resume, #granny-save-btn, #granny-end-overlay, #granny-end-overlay *) { display: none !important; }
 .granny-active {
   outline: 10px solid #0047d4 !important;
   outline-offset: 6px !important;
@@ -44,3 +44,16 @@
 #granny-end-overlay .granny-home { background: #e8dcc4; }
 #granny-end-overlay button:hover { filter: brightness(0.93); }
 #granny-end-overlay button:focus { outline: 10px solid #0047d4; outline-offset: 6px; filter: brightness(0.93); transform: scale(1.03); }
+
+/* "▶ Продовжуємо з 12:34  [⏮ З початку]": top centre for 10 s after resuming */
+#granny-resume {
+  position: fixed; top: 72px; left: 50%; transform: translateX(-50%); z-index: 2147483000;
+  display: flex; align-items: center; gap: 18px;
+  font: 700 28px "Segoe UI", Arial, sans-serif; color: #1b1b1b; background: #fbf6ee;
+  border: 4px solid #1b1b1b; border-radius: 20px; padding: 10px 14px 10px 22px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+#granny-resume button {
+  font: inherit; font-size: 26px; color: #1b1b1b; background: #ffcf33;
+  border: 4px solid #1b1b1b; border-radius: 16px; padding: 8px 18px; cursor: pointer;
+}
+#granny-resume button:focus { outline: 8px solid #0047d4; outline-offset: 4px; }

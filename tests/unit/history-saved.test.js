@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { updateHistory, resumeSeconds, resumeUrl, formatPosition, HISTORY_MAX } from '../../src/lib/history.js';
+import { updateHistory, resumeSeconds, resumeUrl, formatPosition, HISTORY_MAX, updatePositions, positionFor } from '../../src/lib/history.js';
 import { videoIdFromUrl, normalizeVideoUrl, cleanTabTitle, pickOtherBookmarksId, groupSaved, findVideoNodes } from '../../src/lib/saved.js';
 import { compareVersions, shouldReloadNow } from '../../src/lib/update.js';
 import { prevStart } from '../../src/lib/schedule.js';
@@ -160,4 +160,31 @@ test('shouldReloadNow: warn window and disabled entries', () => {
   const off = { diskVersion: '1.1.0', runningVersion: '1.0.0', schedule: [entry('18:00', { enabled: false })] };
   assert.equal(shouldReloadNow({ ...off, now: at(17, 55) }), true);
   assert.equal(shouldReloadNow({ diskVersion: '1.1.0', runningVersion: '1.0.0', schedule: [], now: at(12, 0) }), true);
+});
+
+test('updatePositions: survives the 30-item history cap; fresh start keeps the position; live ignored', () => {
+  let h = [];
+  let p = {};
+  const add = (e, now) => { h = updateHistory(h, e, now); p = updatePositions(p, e, now); };
+  add({ id: 'savedvideo1', title: 'S', time: 754, duration: 3600 }, 1);
+  for (let i = 0; i < 40; i++) add({ id: String(i).padStart(11, 'z'), title: `T${i}`, time: 60, duration: 600 }, 10 + i);
+  assert.equal(h.find((x) => x.id === 'savedvideo1'), undefined); // dropped out of history
+  const pos = positionFor('savedvideo1', h, p);
+  assert.equal(resumeSeconds(pos), 754);
+  assert.equal(resumeUrl(pos), 'https://www.youtube.com/watch?v=savedvideo1&t=754s');
+  add({ id: 'savedvideo1', title: 'S', time: 1, duration: 3600 }, 100); // reopened from the start
+  assert.equal(p.savedvideo1.time, 754);
+  assert.equal(updatePositions(p, { id: 'livevideo01', live: true, time: 5 }, 101), p);
+  assert.equal(updatePositions(p, null, 101), p);
+});
+
+test('updatePositions: capped, newest kept; positionFor prefers the newer record', () => {
+  let p = {};
+  for (let i = 0; i < 6; i++) p = updatePositions(p, { id: `v${i}`, time: 100 + i }, i, 4);
+  assert.deepEqual(Object.keys(p).sort(), ['v2', 'v3', 'v4', 'v5']);
+  const h = [{ id: 'v5', time: 40, duration: 600, updatedAt: 1 }];
+  assert.equal(positionFor('v5', h, { v5: { time: 300, duration: 600, updatedAt: 2 } }).time, 300);
+  assert.equal(positionFor('v5', h, { v5: { time: 300, duration: 600, updatedAt: 0 } }).time, 40);
+  assert.deepEqual(positionFor('nothing', null, null), { id: 'nothing' });
+  assert.equal(resumeSeconds(positionFor('nothing', [], {})), 0);
 });

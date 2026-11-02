@@ -1,8 +1,8 @@
 import { normalizeConfig, migrateConfig, CONFIG_VERSION } from './config.js';
 
-const KEYS = ['cfg_tiles', 'cfg_schedule', 'cfg_topics', 'cfg_flags', 'cfg_version'];
+const KEYS = ['cfg_tiles', 'cfg_schedule', 'cfg_topics', 'cfg_flags', 'cfg_version', 'cfg_news', 'cfg_weather'];
 
-/** Upgrades stored topics once (cfg_version < 2). Returns the (possibly updated) raw storage object. */
+/** Upgrades stored topics once (cfg_version < CONFIG_VERSION). Returns the (possibly updated) raw storage object. */
 export async function ensureMigrated(s) {
   const stored = s || (await chrome.storage.sync.get(KEYS));
   const from = Number(stored.cfg_version) || 1;
@@ -22,6 +22,8 @@ export async function loadConfig() {
     tiles: s.cfg_tiles,
     schedule: s.cfg_schedule,
     topics: s.cfg_topics,
+    news: s.cfg_news,
+    weather: s.cfg_weather,
     hideShortsComments: flags.hideShortsComments,
     fullscreenOnStream: flags.fullscreenOnStream,
   });
@@ -34,6 +36,8 @@ export async function saveConfig(cfg) {
     cfg_tiles: c.tiles,
     cfg_schedule: c.schedule,
     cfg_topics: c.topics,
+    cfg_news: c.news,
+    cfg_weather: c.weather,
     cfg_version: CONFIG_VERSION,
     cfg_flags: { hideShortsComments: c.hideShortsComments, fullscreenOnStream: c.fullscreenOnStream },
   });

@@ -1,0 +1,13 @@
+.ncards { display: flex; flex-direction: column; gap: 20px; }
+.vcard.news { display: flex; gap: 20px; align-items: center; padding: 16px 20px; font-size: 30px; line-height: 1.25; }
+.vcard.news img { width: 220px; flex: 0 0 220px; margin: 0; }
+.vcard.news .t { -webkit-line-clamp: 3; }
+.vcard.news .sub { font-size: 24px; }
+#article { max-width: 1000px; margin: 0 auto; }
+#article h1 { text-align: left; font-size: 44px; line-height: 1.2; margin: 24px 0 8px; }
+#article .hint { text-align: left; margin: 0 0 20px; }
+#a-img { display: block; width: 100%; max-height: 38vh; object-fit: cover; border-radius: 22px; border: var(--bd); margin-bottom: 20px; }
+.abody p { font-size: 36px; line-height: 1.5; margin: 0 0 28px; padding: 4px 8px; border-radius: 10px; scroll-margin-top: 28px; }
+.abody p:focus { outline: 6px solid var(--ring); outline-offset: 6px; background: #fff; }
+.arow { justify-content: flex-start; margin: 16px 0; }
+@media (max-width: 900px) { .vcard.news img { display: none; } }

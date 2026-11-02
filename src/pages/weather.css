@@ -1,0 +1,16 @@
+.now { display: flex; align-items: center; justify-content: center; gap: 40px; flex-wrap: wrap; max-width: 1200px; margin: 0 auto 32px; }
+.now .icon { font-size: 150px; line-height: 1; }
+.now .temp { font-size: 140px; font-weight: 800; line-height: 1; }
+.now .text { font-size: 44px; font-weight: 700; }
+.now .sub { font-size: 32px; color: #4a4a4a; }
+.days { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto; }
+.day { background: #fff; border: var(--bd); border-radius: 28px; padding: 20px; text-align: center; }
+.day .name { font-size: 34px; font-weight: 800; }
+.day .icon { font-size: 80px; line-height: 1.2; }
+.day .range { font-size: 40px; font-weight: 800; }
+.day .text, .day .rain { font-size: 28px; }
+@media (max-height: 800px) {
+  .now .icon { font-size: 100px; }
+  .now .temp { font-size: 96px; }
+  .day .icon { font-size: 56px; }
+}

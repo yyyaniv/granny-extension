@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <title>Новини</title>
+  <link rel="stylesheet" href="common.css">
+  <link rel="stylesheet" href="saved.css">
+  <link rel="stylesheet" href="news.css">
+</head>
+<body>
+  <div id="page">
+    <h1>📰 Новини</h1>
+    <div class="layout">
+      <nav id="side" class="side" data-nav-zone="side" aria-label="Джерела"></nav>
+      <main id="main">
+        <section id="list-sec">
+          <h2 id="list-title">Усі новини</h2>
+          <p id="msg" class="msg">Завантажую новини…</p>
+          <div id="list" class="ncards"></div>
+        </section>
+      </main>
+    </div>
+  </div>
+  <article id="article" hidden>
+    <div class="row arow"><button id="a-back" class="big accent small" data-nav>◀ До новин</button></div>
+    <h1 id="a-title"></h1>
+    <p id="a-sub" class="hint"></p>
+    <img id="a-img" alt="" hidden>
+    <div id="a-body" class="abody"></div>
+    <div class="row arow">
+      <button id="a-back2" class="big accent small" data-nav>◀ До новин</button>
+      <a id="a-site" class="big muted small" data-nav>🌐 Відкрити на сайті</a>
+      <a class="big muted small" href="home.html" data-nav>🏠 На головну</a>
+    </div>
+  </article>
+  <script type="module" src="news.js"></script>
+</body>
+</html>

@@ -2,6 +2,7 @@ import { loadConfig, saveConfig, getAnnounceAudio, setAnnounceAudio } from '../l
 import { normalizeConfig, migrateConfig, normalizeEntry, validateEntry, validateTile, newId, ALL_DAYS } from '../lib/config.js';
 import { DAY_NAMES_SHORT } from '../lib/datetime.js';
 import { getFolderId, listSaved, createCategory, deleteCategory } from '../lib/saved.js';
+import { geocodeUrl, parseGeocode } from '../lib/weather.js';
 
 const $ = (id) => document.getElementById(id);
 const TYPE_LABEL = { 'youtube-channel': 'Канал YouTube', 'youtube-video': 'Відео YouTube', 'facebook-profile': 'Facebook' };
@@ -162,6 +163,56 @@ function renderTiles() {
   });
 }
 
+// ---------------- news ----------------
+function renderNews() {
+  const box = $('news');
+  box.replaceChildren();
+  cfg.news.forEach((t) => {
+    const upd = (key) => (ev) => {
+      t[key] = ev.target.value.trim();
+      const errs = validateTile(t);
+      if (errs.length) status(errs[0], true); else persist();
+    };
+    box.append(h('div', { class: 'tile-row' },
+      h('input', { value: t.icon, title: 'Значок', onchange: upd('icon') }),
+      h('input', { value: t.name, placeholder: 'Назва', onchange: upd('name') }),
+      h('input', { value: t.url, placeholder: 'https://…/rss', onchange: upd('url') }),
+      h('button', { class: 'danger', onclick: () => { cfg.news = cfg.news.filter((x) => x !== t); persist(); renderNews(); } }, 'Видалити')));
+  });
+}
+
+// ---------------- weather ----------------
+function renderWeather() {
+  $('weather-on').checked = cfg.weather.enabled;
+  $('weather-city').textContent = cfg.weather.city;
+}
+
+function initWeather() {
+  $('weather-on').addEventListener('change', (e) => { cfg.weather.enabled = e.target.checked; persist(); });
+  const find = async () => {
+    const q = $('weather-q').value.trim();
+    const box = $('weather-results');
+    if (!q) return status('Вкажіть назву міста.', true);
+    box.replaceChildren(h('p', { class: 'note' }, 'Шукаю…'));
+    let found = [];
+    try { found = parseGeocode(await (await fetch(geocodeUrl(q))).json()); } catch { /* offline */ }
+    box.replaceChildren(...(found.length ? found.map((r) => h('div', { class: 'row' },
+      h('span', { class: 'grow' }, r.label),
+      h('button', {
+        class: 'primary',
+        onclick: async () => {
+          cfg.weather = { ...cfg.weather, city: r.name, lat: r.lat, lon: r.lon };
+          await persist('Місто збережено ✓');
+          box.replaceChildren();
+          $('weather-q').value = '';
+          renderWeather();
+        },
+      }, 'Обрати'))) : [h('p', { class: 'note' }, 'Нічого не знайдено. Спробуйте написати інакше.')]));
+  };
+  $('weather-find').addEventListener('click', find);
+  $('weather-q').addEventListener('keydown', (e) => { if (e.key === 'Enter') find(); });
+}
+
 // ---------------- topics ----------------
 function renderTopics() {
   const box = $('topics');
@@ -231,6 +282,10 @@ function initGeneral() {
   $('add-tile').addEventListener('click', () => {
     cfg.tiles.push({ id: newId('t'), name: 'Новий сайт', icon: '🌐', url: 'https://' });
     renderTiles();
+  });
+  $('add-news').addEventListener('click', () => {
+    cfg.news.push({ id: newId('n'), name: 'Нове джерело', icon: '📰', url: 'https://' });
+    renderNews();
   });
 }
 
@@ -332,6 +387,8 @@ function renderAll() {
   renderSchedule();
   renderTiles();
   renderTopics();
+  renderNews();
+  renderWeather();
   $('hideShorts').checked = cfg.hideShortsComments;
   $('fullscreen').checked = cfg.fullscreenOnStream;
 }
@@ -344,6 +401,7 @@ async function init() {
   initMic();
   initBackup();
   initSaved();
+  initWeather();
   renderAll();
   // First run: store defaults so that background sees a config.
   const s = await chrome.storage.sync.get('cfg_schedule');

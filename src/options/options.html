@@ -51,6 +51,22 @@
   </section>
 
   <section>
+    <h2>Новини (сторінка «📰 Читати новини»)</h2>
+    <p class="note">RSS-стрічки сайтів. Якщо в стрічці є повний текст (Еспресо, Українська правда), бабуся читає статтю великим шрифтом без реклами; інакше відкривається сайт (з кнопкою «🏠 Помічник» унизу).</p>
+    <div id="news"></div>
+    <button id="add-news">+ Додати джерело</button>
+  </section>
+
+  <section>
+    <h2>Погода</h2>
+    <label class="inline"><input type="checkbox" id="weather-on"> Показувати погоду на головній сторінці</label>
+    <p>Місто зараз: <b id="weather-city"></b></p>
+    <label>Знайти інше місто <input id="weather-q" placeholder="Наприклад: Тернопіль"></label>
+    <div class="buttons"><button id="weather-find" class="primary">Знайти</button></div>
+    <div id="weather-results"></div>
+  </section>
+
+  <section>
     <h2>Теми (кнопки «Рецепти», «Город», «Здоров'я», «Історії»)</h2>
     <p class="note">Фрази — по одній на рядок; щоразу показуються 5 випадкових (чим більше фраз, тим різноманітніше).</p>
     <div id="topics"></div>
