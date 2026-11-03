@@ -35,7 +35,6 @@ h1 { font-size: 44px; margin: 0 0 24px; text-align: center; }
 .big.tile-voice { --bg: #2e7d32; --fg: #ffffff; }
 .big.tile-saved { --bg: #f6a98e; }
 .big.tile-news { --bg: #37474f; --fg: #ffffff; }
-.big.tile-weather { --bg: #bfe3f5; }
 .big.tile-calendar { --bg: #c5e6a6; }
 .big.topic-recipes { --bg: #ffd7b5; }
 .big.topic-garden { --bg: #cdeccd; }
@@ -53,8 +52,38 @@ h1 { font-size: 44px; margin: 0 0 24px; text-align: center; }
 .footer { margin-top: 40px; display: flex; justify-content: center; }
 .footer .big { min-width: 360px; }
 
-/* floating scroll buttons (nav.js) reserve room so they never cover content */
+/* "◀ Назад": always at the top left of a page, same size everywhere */
+.big.back { min-height: 0; font-size: clamp(24px, 4.4vh, 32px); padding: 8px 22px; border-radius: 22px; white-space: nowrap; }
+
+/* One-screen pages: a header row (◀ Назад + title) and the content fills the rest of the window. */
+body.onescreen { height: 100vh; display: flex; flex-direction: column; padding: 14px 32px 20px; }
+.pagehead { display: flex; align-items: center; gap: 28px; margin-bottom: clamp(10px, 2.4vh, 22px); }
+.pagehead h1 { flex: 1; margin: 0; font-size: clamp(30px, 6vh, 44px); line-height: 1.15; text-align: left; }
+.fill { flex: 1; min-height: 0; }
+@media (max-width: 900px) { body.onescreen { height: auto; } }
+
+/* floating corner (nav.js): ▲ Вгору / ▼ Вниз / ◀ Назад; the page keeps room so it never covers content */
 body.has-scrollbtns { padding-right: 230px; padding-bottom: 60px; }
-.scrollbtns { position: fixed; right: 24px; bottom: 24px; z-index: 50; display: flex; flex-direction: column; gap: 16px; }
-.scrollbtns .big { min-height: 0; font-size: 30px; padding: 14px 22px; border-radius: 22px; width: 180px; }
-@media (max-width: 900px) { body.has-scrollbtns { padding-right: 40px; padding-bottom: 220px; } }
+.scrollbtns { position: fixed; right: 24px; bottom: 24px; z-index: 50; display: flex; flex-direction: column; gap: 14px; }
+.scrollbtns .big { min-height: 0; font-size: 30px; padding: 12px 22px; border-radius: 22px; width: 180px; }
+@media (max-height: 700px) { .scrollbtns { gap: 10px; } .scrollbtns .big { font-size: 26px; padding: 8px 18px; } }
+@media (max-width: 900px) { body.has-scrollbtns { padding-right: 40px; padding-bottom: 260px; } }
+
+/* voice search (voice-flow.js): centred column, never taller than the window */
+.vflow { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(8px, 2vh, 20px); max-width: 1100px; width: 100%; margin: 0 auto; }
+.vflow .msg { margin: 0; font-size: clamp(26px, 5vh, 36px); }
+.vflow .huge { margin: 0; font-size: clamp(36px, 8.5vh, 64px); line-height: 1.15; max-height: 3.6em; overflow: hidden; }
+.vflow > .big { min-width: 60%; min-height: clamp(90px, 20vh, 130px); }
+.vflow .vrow { display: flex; gap: 28px; justify-content: center; width: 100%; }
+.vflow .vrow .big { flex: 1; min-height: clamp(90px, 18vh, 130px); }
+.vflow .big.small { min-height: 0; min-width: 300px; }
+
+/* a page of big choices (topic, programs): two columns, the rows share the window height */
+.choices { display: grid; grid-template-columns: repeat(2, 1fr); grid-auto-rows: minmax(64px, 1fr); gap: clamp(10px, 2.2vh, 22px); width: 100%; max-width: 1400px; margin: 0 auto; }
+.choices.one-col { grid-template-columns: 1fr; max-width: 1000px; }
+.choices .big { min-height: 0; padding: 6px 22px; font-size: clamp(26px, 5vh, 38px); line-height: 1.15; }
+.choices .big .icon { font-size: clamp(32px, 6vh, 54px); }
+.choices .big .time { font-weight: 800; }
+/* odd number of buttons: the last one takes the whole row */
+.choices:not(.one-col) > .big:last-child:nth-child(odd) { grid-column: 1 / -1; }
+@media (max-width: 900px) { .choices { grid-template-columns: 1fr; grid-auto-rows: 100px; } }

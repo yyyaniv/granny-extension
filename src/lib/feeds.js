@@ -32,7 +32,8 @@ const clean = (s) => s.replace(/\s+/g, ' ').trim();
 
 /**
  * Article HTML (or plain text) -> list of plain-text paragraphs.
- * Plain text glued without breaks ("...формули?Не думаю") is split after sentence ends.
+ * Plain text glued without breaks ("...формули?Не думаю", "...полоненогоІнформацію") is split after sentence ends
+ * and where a lowercase letter runs straight into a capitalised word.
  */
 export function htmlToParagraphs(html) {
   let s = unCdata(html);
@@ -40,7 +41,8 @@ export function htmlToParagraphs(html) {
   const hasBlocks = /<(p|br|li|div|h\d)[\s>/]/i.test(s);
   s = s.replace(/<\/?(p|br|li|div|h\d|ul|ol|blockquote)[^>]*>/gi, '\n').replace(/<[^>]+>/g, '');
   let parts = decodeEntities(s).split(/\n+/).map(clean).filter(Boolean);
-  if (!hasBlocks) parts = parts.flatMap((p) => p.split(/(?<=[.!?…][»"”)]?)(?=[А-ЯІЇЄҐA-Z«"„])/u).map(clean).filter(Boolean));
+  // also a subheading glued to the next paragraph: "...військовополоненогоІнформацію про..."
+  if (!hasBlocks) parts = parts.flatMap((p) => p.split(/(?<=[.!?…][»"”)]?)(?=[А-ЯІЇЄҐA-Z«"„])|(?<=[а-яіїєґ])(?=[А-ЯІЇЄҐ][а-яіїєґʼ'])/u).map(clean).filter(Boolean));
   return parts.filter((p) => !/^Читайте також/i.test(p));
 }
 

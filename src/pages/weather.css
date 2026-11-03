@@ -1,7 +1,9 @@
-/* A week on one screen: "now" and the home button on the left, 7 day rows on the right. */
+/* A week on one screen: ◀ Назад, the town and "now" on the left, 7 day rows on the right. */
 body.weather-page { height: 100vh; display: grid; grid-template-columns: minmax(300px, 1fr) 2fr; gap: 32px; padding: 20px 32px; }
-.left { min-height: 0; padding: 0 18px 20px; display: flex; flex-direction: column; justify-content: space-between; gap: 16px; text-align: center; }
-.left h1 { font-size: clamp(32px, 6vh, 48px); margin: 0; }
+.left { min-height: 0; padding: 0 0 20px; display: flex; flex-direction: column; gap: 16px; text-align: center; }
+.lhead { display: flex; align-items: center; gap: 18px; }
+.lhead h1 { flex: 1; font-size: clamp(28px, 5.4vh, 44px); margin: 0; line-height: 1.1; }
+.now { flex: 1; display: flex; flex-direction: column; justify-content: center; }
 .now .icon { font-size: clamp(80px, 18vh, 160px); line-height: 1; }
 .now .temp { font-size: clamp(72px, 16vh, 140px); font-weight: 800; line-height: 1; }
 .now .text { font-size: clamp(30px, 5.4vh, 46px); font-weight: 700; }

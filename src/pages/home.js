@@ -36,13 +36,17 @@ async function render() {
   cfg = await loadConfig();
   tiles.replaceChildren();
   for (const t of cfg.tiles) tiles.append(tile(t.icon, t.name, t.url, `tile-${t.id}`));
+  // the first big tile gets the focus, not the weather line above it
+  tiles.firstElementChild?.setAttribute('data-autofocus', '');
+  // Fewer, bigger tiles. The week's weather opens from the weather line at the top;
+  // voice search sits with the topics on the right ("Знайти на YouTube").
   tiles.append(tile('🙏', 'Програми', 'programs.html', 'tile-programs'));
-  tiles.append(tile('🎤', 'Пошукати голосом', 'voice.html', 'tile-voice'));
   tiles.append(tile('📰', 'Читати новини', 'news.html', 'tile-news'));
-  if (cfg.weather.enabled) tiles.append(tile('🌤️', 'Погода на тиждень', 'weather.html', 'tile-weather'));
   tiles.append(tile('⭐', 'Мої відео і сайти', 'saved.html', 'tile-saved'));
   tiles.append(tile('📅', 'Календар', 'calendar.html', 'tile-calendar'));
-  topics.replaceChildren(...cfg.topics.map((t) => tile(t.icon, t.title, `topic.html?id=${encodeURIComponent(t.id)}`, `muted topic-${t.id}`)));
+  topics.replaceChildren(
+    tile('🎤', 'Сказати голосом', 'voice.html', 'tile-voice'),
+    ...cfg.topics.map((t) => tile(t.icon, t.title, `topic.html?id=${encodeURIComponent(t.id)}`, `muted topic-${t.id}`)));
   tick();
   showWeather();
   const first = tiles.querySelector('[data-nav]');
@@ -53,11 +57,9 @@ async function showWeather() {
   const box = document.getElementById('weather');
   if (!cfg.weather.enabled) { box.hidden = true; return; }
   const w = await getWeather(cfg.weather).catch(() => null);
-  box.textContent = w ? `${shortLine(w)} · ${cfg.weather.city}` : '';
+  // a button: opens the week's forecast
+  box.textContent = w ? `${shortLine(w)} · ${cfg.weather.city} ›` : '';
   box.hidden = !w;
-  // the tile shows today's sky: "☁️ Погода на тиждень"
-  const icon = tiles.querySelector('.tile-weather .icon');
-  if (icon && w) icon.textContent = w.now.icon;
 }
 
 // Paused by the grandson: show Chrome's own new tab page (or a short note if that fails).

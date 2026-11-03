@@ -1,7 +1,7 @@
 import { loadConfig } from '../lib/storage.js';
 import { isReadable, formatWhen } from '../lib/feeds.js';
 import { loadNews } from './news-data.js';
-import { enableNav, enableScrollButtons, el, focusItem, animateScrollTo, goHome } from './nav.js';
+import { enableNav, enableScrollButtons, el, focusItem, goHome, backButton, BACK_LABEL } from './nav.js';
 
 const $ = (id) => document.getElementById(id);
 let sources = [];
@@ -34,9 +34,9 @@ function renderSide() {
     onclick: () => { filter = key; renderList(); renderSide(); focusFirstCard(); },
   }, filter === key ? `✓ ${label}` : label);
   $('side').replaceChildren(
+    backButton(),
     btn('all', '📰 Усі новини'),
-    ...sources.map((s) => btn(s.id, `${s.icon} ${s.name}`)),
-    el('a', { class: 'big small muted', href: 'home.html', 'data-nav': true }, '🏠 На головну'));
+    ...sources.map((s) => btn(s.id, `${s.icon} ${s.name}`)));
 }
 
 function renderList() {
@@ -74,6 +74,7 @@ function openArticle(item, from) {
   $('a-site').href = item.link;
   $('page').hidden = true;
   $('article').hidden = false;
+  refreshCorner();
   window.scrollTo(0, 0);
   $('a-back').focus({ preventScroll: true });
   history.pushState({ article: true }, '');
@@ -83,11 +84,14 @@ function closeArticle() {
   if (!reading()) return;
   $('article').hidden = true;
   $('page').hidden = false;
+  refreshCorner();
   window.scrollTo(0, listY);
   if (opener && opener.isConnected) opener.focus({ preventScroll: true });
 }
 
 const back = () => { if (reading() && history.state && history.state.article) history.back(); else closeArticle(); };
+let corner = null; // floating ▲ ▼ ◀: "◀ Назад" goes to the list while reading, home otherwise
+const refreshCorner = () => corner && corner.refresh();
 $('a-back').addEventListener('click', back);
 $('a-back2').addEventListener('click', back);
 window.addEventListener('popstate', closeArticle);
@@ -109,6 +113,11 @@ async function init() {
 }
 
 enableNav({ onEscape: () => (reading() ? back() : goHome()) });
-init().then(() => enableScrollButtons(() => (reading()
-  ? [...document.querySelectorAll('#a-body p')]
-  : [...document.querySelectorAll('#list .vcard')])));
+init().then(() => {
+  corner = enableScrollButtons(() => (reading()
+    ? [...document.querySelectorAll('#a-body p')]
+    : [...document.querySelectorAll('#list .vcard')]), {
+    back: () => (reading() ? back() : goHome()),
+    backLabel: () => (reading() ? '◀ До новин' : BACK_LABEL),
+  });
+});

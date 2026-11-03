@@ -1,6 +1,6 @@
 import { listSaved, removeVideo, siteName } from '../lib/saved.js';
 import { resumeSeconds, resumeUrl, formatPosition, positionFor } from '../lib/history.js';
-import { enableNav, enableScrollButtons, el, focusItem, animateScrollTo, goHome } from './nav.js';
+import { enableNav, enableScrollButtons, el, focusItem, animateScrollTo, goHome, backButton, BACK_LABEL } from './nav.js';
 
 const $ = (id) => document.getElementById(id);
 const MAX_HISTORY = 8;
@@ -50,14 +50,13 @@ const sideBtn = (key, label, onclick) => el('button', {
 function renderSide(history) {
   const { categories, uncategorized } = data;
   const go = (key) => { filter = key; renderSaved(history); focusSection('saved'); };
-  const btns = [];
+  const btns = [backButton()];
   if (history.length) {
     btns.push(el('button', { class: 'big small muted', 'data-nav': true, 'data-key': 'continue', onclick: () => focusSection('continue') }, '▶ Продовжити'));
   }
   btns.push(sideBtn('all', '⭐ Усі збережені', () => go('all')));
   for (const c of categories) btns.push(sideBtn(c.id, c.title, () => go(c.id)));
   if (uncategorized.length && categories.length) btns.push(sideBtn('none', 'Без категорії', () => go('none')));
-  btns.push(el('a', { class: 'big small muted', href: 'home.html', 'data-nav': true }, '🏠 На головну'));
   $('side').replaceChildren(...btns);
   setBarHeight();
 }
@@ -101,9 +100,11 @@ function renderSaved(history) {
 
 // ---------- confirm: while open it is the only thing on the page ----------
 let pending = null;
+let corner = null;
 function setConfirm(open) {
   $('page').hidden = open;
   $('confirm').hidden = !open;
+  if (corner) corner.refresh();
 }
 function ask(video, opener) {
   pending = { video, opener, y: window.scrollY, index: [...$('list').querySelectorAll('.item')].findIndex((i) => i.contains(opener)) };
@@ -154,4 +155,10 @@ async function load() {
 }
 
 enableNav({ onEscape: () => (pending ? cancel() : goHome()) });
-load().then(() => { focusInitial(); enableScrollButtons(() => [...document.querySelectorAll('#main section, #main .vcard')]); });
+load().then(() => {
+  focusInitial();
+  corner = enableScrollButtons(() => [...document.querySelectorAll('#main section, #main .vcard')], {
+    back: () => (pending ? cancel() : goHome()),
+    backLabel: () => (pending ? '◀ Ні, назад' : BACK_LABEL),
+  });
+});

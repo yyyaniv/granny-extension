@@ -5,11 +5,13 @@
   <title>Тема</title>
   <link rel="stylesheet" href="common.css">
 </head>
-<body>
-  <h1 id="heading"></h1>
-  <main id="content" class="grid"></main>
-  <div id="flow" class="stack" hidden></div>
-  <div class="footer"><a class="big muted small" href="home.html" data-nav>🏠 На головну</a></div>
+<body class="onescreen">
+  <header class="pagehead">
+    <a class="big muted back" href="home.html" data-nav>◀ Назад</a>
+    <h1 id="heading"></h1>
+  </header>
+  <main id="content" class="choices fill"></main>
+  <div id="flow" class="vflow fill" hidden></div>
   <script type="module" src="topic.js"></script>
 </body>
 </html>

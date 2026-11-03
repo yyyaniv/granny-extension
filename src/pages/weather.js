@@ -8,7 +8,8 @@ const dayTitle = (d, i) => (i === 0 ? 'Сьогодні' : i === 1 ? 'Завтр
 
 async function init() {
   const cfg = await loadConfig();
-  $('heading').textContent = `Погода: ${cfg.weather.city}`;
+  $('heading').textContent = cfg.weather.city;
+  document.title = `Погода: ${cfg.weather.city}`;
   const w = await getWeather(cfg.weather).catch(() => null);
   if (!w) {
     $('msg').hidden = false;

@@ -2,7 +2,7 @@ import { listen, speechSupported, MESSAGES } from './speech.js';
 import { buildTopicQuery, buildYoutubeSearchUrl } from '../lib/query.js';
 import { el, focusFirst } from './nav.js';
 
-/** Renders mic -> listening -> confirm flow into `root`. */
+/** Renders mic -> listening -> confirm flow into `root` (a .vflow box: everything fits one screen). */
 export function startVoiceFlow(root, { prefix = '' } = {}) {
   let session = null;
 
@@ -37,8 +37,7 @@ export function startVoiceFlow(root, { prefix = '' } = {}) {
     show(
       el('div', { class: 'msg', text: 'Ви сказали:' }),
       el('div', { class: 'huge', text: query }),
-      el('div', { class: 'msg', text: 'Шукати це?' }),
-      el('div', { class: 'stack' },
+      el('div', { class: 'vrow' },
         el('a', { class: 'big accent', href: buildYoutubeSearchUrl(query), 'data-nav': true, 'data-autofocus': true }, '✅ Так, шукати'),
         el('button', { class: 'big muted', 'data-nav': true, onclick: begin }, '🎤 Сказати ще раз'),
       ),

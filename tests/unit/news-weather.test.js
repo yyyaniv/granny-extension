@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { parseRss, htmlToParagraphs, decodeEntities, isReadable, mergeNews, formatWhen } from '../../src/lib/feeds.js';
-import { describeCode, formatTemp, summarize, shortLine, parseGeocode, forecastUrl, geocodeUrl } from '../../src/lib/weather.js';
+import { describeCode, formatTemp, summarize, shortLine, parseGeocode, forecastUrl, geocodeUrl, translitUk, parsePlaceQuery, geocodeNames, mergePlaces, inRegion } from '../../src/lib/weather.js';
 
 const fx = (n) => readFileSync(new URL(`../fixtures/${n}`, import.meta.url), 'utf8');
 
@@ -43,6 +43,10 @@ test('fixture: Суспільне — only a lead (opens on the site), placehold
 
 test('htmlToParagraphs / decodeEntities edge cases', () => {
   assert.deepEqual(htmlToParagraphs('<p>Один &amp; два</p><script>alert(1)</script><p> </p><p>Три<br>Чотири</p>'), ['Один & два', 'Три', 'Чотири']);
+  // Espreso glues a subheading to the next paragraph; abbreviations (ЗСУ) and blocks stay as they are
+  assert.deepEqual(htmlToParagraphs('Про це пише "Медіазона".Що відомо про смерть військовополоненогоІнформацію знайшли в суді. Воїни ЗСУ тримають оборону.'),
+    ['Про це пише "Медіазона".', 'Що відомо про смерть військовополоненого', 'Інформацію знайшли в суді. Воїни ЗСУ тримають оборону.']);
+  assert.deepEqual(htmlToParagraphs('<p>оборонуЗСУ і МакДональдс</p>'), ['оборонуЗСУ і МакДональдс']);
   assert.deepEqual(htmlToParagraphs('<figure><img src="x"><figcaption>Фото</figcaption></figure><p>Текст</p>'), ['Текст']);
   assert.deepEqual(htmlToParagraphs('Перше речення.Друге речення!«Третє» тут. 3.5 млн'), ['Перше речення.', 'Друге речення!', '«Третє» тут. 3.5 млн']);
   assert.equal(decodeEntities('&#8220;x&#x201D; &laquo;y&raquo; &bogus;'), '“x” «y» &bogus;');
@@ -92,6 +96,36 @@ test('weather: urls and geocoding', () => {
   assert.match(forecastUrl(49.8, 24), /latitude=49\.8&longitude=24&/);
   assert.match(geocodeUrl(' Львів '), /name=%D0%9B%D1%8C%D0%B2%D1%96%D0%B2&.*language=uk/);
   const r = parseGeocode({ results: [{ name: 'Львів', admin1: 'Львівська Область', country: 'Україна', latitude: 49.83826, longitude: 24.02324 }, { name: 'X' }] });
-  assert.deepEqual(r, [{ name: 'Львів', label: 'Львів, Львівська Область, Україна', lat: 49.838, lon: 24.023 }]);
+  assert.deepEqual(r, [{ name: 'Львів', label: 'Львів, Львівська Область, Україна', admin: 'Львівська Область', lat: 49.838, lon: 24.023 }]);
   assert.deepEqual(parseGeocode(null), []);
+});
+
+test('weather: villages known only by their Latin name (Рудки -> Rudky)', () => {
+  assert.equal(translitUk('Рудки'), 'Rudky');
+  assert.equal(translitUk('Яворів'), 'Yavoriv');
+  assert.equal(translitUk('Згурівка'), 'Zghurivka');
+  assert.equal(translitUk('Кам\'янка-Бузька'), 'Kamianka-Buzka');
+  assert.equal(translitUk('Lviv'), 'Lviv');
+  assert.deepEqual(parsePlaceQuery(' Рудки,  Львівська область '), { name: 'Рудки', region: 'Львівська область' });
+  assert.deepEqual(parsePlaceQuery('Рудки Львівська обл'), { name: 'Рудки', region: 'Львівська обл' });
+  assert.deepEqual(parsePlaceQuery('Біла Церква'), { name: 'Біла Церква', region: '' });
+  assert.deepEqual(parsePlaceQuery('Кам\'янка-Бузька'), { name: 'Кам\'янка-Бузька', region: '' });
+  assert.deepEqual(geocodeNames('Рудки'), ['Рудки', 'Rudky']);
+  assert.deepEqual(geocodeNames('Rudky'), ['Rudky']);
+
+  // real Open-Meteo answer for "Rudky" (the Ukrainian query returns nothing)
+  const rudky = parseGeocode({ results: [
+    { name: 'Rudky', admin1: 'Львівська Область', admin2: 'Sambirs’ka Mis’krada', country: 'Україна', latitude: 49.65349, longitude: 23.48669 },
+    { name: 'Rudky', admin1: 'Волинська область', country: 'Україна', latitude: 51.1, longitude: 25.1 },
+  ] });
+  assert.equal(rudky[0].label, 'Rudky, Львівська Область, Україна'); // Latin district names are left out
+  const all = mergePlaces({ name: 'рудки', region: '' }, [{ query: 'рудки', places: [] }, { query: 'Rudky', places: rudky }]);
+  assert.deepEqual(all.map((p) => p.label), ['Рудки, Львівська Область, Україна', 'Рудки, Волинська область, Україна']);
+  assert.deepEqual([all[0].name, all[0].lat, all[0].lon], ['Рудки', 49.653, 23.487]);
+  const lviv = mergePlaces({ name: 'Рудки', region: 'Львівська обл' }, [{ query: 'Rudky', places: rudky }, { query: 'x', places: rudky }]);
+  assert.equal(lviv.length, 1);
+  assert.ok(inRegion({ admin: 'Lviv Oblast' }, 'Львівська'));
+  assert.ok(!inRegion({ admin: 'Волинська область' }, 'Львівська'));
+  // a region that matches nothing does not hide the results
+  assert.equal(mergePlaces({ name: 'Рудки', region: 'Київська' }, [{ query: 'Rudky', places: rudky }]).length, 2);
 });

@@ -17,8 +17,9 @@ export function defaultTiles() {
   ];
 }
 
-// Schema version of stored config. 2 = bigger topic pools + «Історії» topic; 3 = «Новини» topic.
-export const CONFIG_VERSION = 3;
+// Schema version of stored config. 2 = bigger topic pools + «Історії» topic; 3 = «Новини» topic;
+// 4 = weather town Рудки instead of the old default Львів.
+export const CONFIG_VERSION = 4;
 
 // Topic lists shipped in 1.0.0 (kept to recognise untouched installs when migrating).
 const OLD_DEFAULT_ITEMS = {
@@ -119,8 +120,26 @@ export function defaultNews() {
   ];
 }
 
+// Рудки, Самбірський район, Львівська область.
 export function defaultWeather() {
-  return { city: 'Львів', lat: 49.838, lon: 24.023, enabled: true };
+  return { city: 'Рудки', lat: 49.653, lon: 23.487, enabled: true };
+}
+
+// The default town before CONFIG_VERSION 4 (to recognise installs that never chose a town).
+const OLD_DEFAULT_WEATHER = { city: 'Львів', lat: 49.838, lon: 24.023 };
+
+/**
+ * Weather settings stored before version 4 that still hold the old default (Львів) become Рудки;
+ * a town the grandson chose stays. Returns the new weather object, or null when nothing changes (pure).
+ */
+export function migrateWeather(weather, fromVersion) {
+  const from = Number(fromVersion) || 1;
+  if (from >= 4 || !weather || typeof weather !== 'object') return null;
+  const w = weather;
+  const isOld = w.city === OLD_DEFAULT_WEATHER.city && Number(w.lat) === OLD_DEFAULT_WEATHER.lat && Number(w.lon) === OLD_DEFAULT_WEATHER.lon;
+  if (!isOld) return null;
+  const d = defaultWeather();
+  return { ...w, city: d.city, lat: d.lat, lon: d.lon };
 }
 
 export function defaultSchedule() {

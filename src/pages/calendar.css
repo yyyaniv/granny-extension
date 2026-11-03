@@ -1,6 +1,7 @@
 /* One screen: the chosen day on the left, the month (calendar or "what to sow when") on the right. */
 body.calendar-page { height: 100vh; display: grid; grid-template-columns: minmax(320px, 1fr) 1.9fr; gap: 28px; padding: 16px 32px 20px; }
-.left { min-height: 0; padding: 0 16px 14px; display: flex; flex-direction: column; justify-content: space-between; gap: 10px; text-align: center; }
+.left { min-height: 0; padding: 0 0 14px; display: flex; flex-direction: column; gap: 10px; text-align: center; }
+.left .back { align-self: flex-start; }
 .detail { display: flex; flex-direction: column; gap: 6px; }
 .detail .when { font-size: clamp(22px, 4vh, 32px); color: #4a4a4a; font-weight: 700; }
 .detail .date { font-size: clamp(34px, 7vh, 56px); font-weight: 800; line-height: 1.05; }

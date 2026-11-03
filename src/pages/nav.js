@@ -140,10 +140,14 @@ export function enableNav(opts = {}) {
 }
 
 /**
- * Big floating "▲ Вгору" / "▼ Вниз" buttons on long pages. Each click moves one target
- * (getTargets() -> elements) at constant speed. Shown only when the page is taller than the window.
+ * Floating corner (bottom right), shown only when the page is taller than the window: "▲ Вгору" / "▼ Вниз"
+ * (each click moves one target from getTargets() at constant speed) and "◀ Назад", always at hand while scrolling.
+ * back() / backLabel() default to the home page; the news reader and the saved-page dialog pass their own.
+ * @param {() => Element[]} getTargets
+ * @param {{back?: () => void, backLabel?: () => string}} [opts]
  */
-export function enableScrollButtons(getTargets) {
+export function enableScrollButtons(getTargets, opts = {}) {
+  const { back = goHome, backLabel = () => BACK_LABEL } = opts;
   let clickAt = 0;
   const step = (dir) => {
     const now = performance.now();
@@ -158,16 +162,19 @@ export function enableScrollButtons(getTargets) {
     animateScrollTo(tops[i]);
   };
   const btn = (label, dir) => el('button', { class: 'big accent', type: 'button', onclick: () => step(dir) }, label);
-  const box = el('div', { class: 'scrollbtns' }, btn('▲ Вгору', -1), btn('▼ Вниз', 1));
+  const backBtn = el('button', { class: 'big muted back', type: 'button', onclick: () => back() }, backLabel());
+  const box = el('div', { class: 'scrollbtns' }, btn('▲ Вгору', -1), btn('▼ Вниз', 1), backBtn);
   document.body.append(box);
   const refresh = () => {
     const long = document.documentElement.scrollHeight > window.innerHeight + 40;
     box.hidden = !long;
     document.body.classList.toggle('has-scrollbtns', long);
+    backBtn.textContent = backLabel();
   };
   window.addEventListener('resize', refresh);
   new ResizeObserver(refresh).observe(document.body);
   refresh();
+  return { refresh };
 }
 
 export function el(tag, attrs = {}, ...children) {
@@ -183,6 +190,9 @@ export function el(tag, attrs = {}, ...children) {
   return node;
 }
 
-export function homeButton(label = '🏠 На головну') {
-  return el('a', { class: 'big muted small', href: HOME_PAGE, 'data-nav': true }, label);
+export const BACK_LABEL = '◀ Назад';
+
+/** The "◀ Назад" button at the top left of every page: back to the home page. */
+export function backButton(label = BACK_LABEL) {
+  return el('a', { class: 'big muted back', href: HOME_PAGE, 'data-nav': true }, label);
 }

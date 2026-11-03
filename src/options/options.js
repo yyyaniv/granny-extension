@@ -2,7 +2,7 @@ import { loadConfig, saveConfig, getAnnounceAudio, setAnnounceAudio } from '../l
 import { normalizeConfig, migrateConfig, normalizeEntry, validateEntry, validateTile, newId, ALL_DAYS } from '../lib/config.js';
 import { DAY_NAMES_SHORT } from '../lib/datetime.js';
 import { getFolderId, listSaved, createCategory, deleteCategory } from '../lib/saved.js';
-import { geocodeUrl, parseGeocode } from '../lib/weather.js';
+import { geocodeUrl, parseGeocode, parsePlaceQuery, geocodeNames, mergePlaces } from '../lib/weather.js';
 
 const $ = (id) => document.getElementById(id);
 const TYPE_LABEL = { 'youtube-channel': 'Канал YouTube', 'youtube-video': 'Відео YouTube', 'facebook-profile': 'Facebook' };
@@ -194,8 +194,11 @@ function initWeather() {
     const box = $('weather-results');
     if (!q) return status('Вкажіть назву міста.', true);
     box.replaceChildren(h('p', { class: 'note' }, 'Шукаю…'));
+    // small villages (Рудки) are known to the geocoder only by their Latin name; "Рудки, Львівська" narrows the list
+    const query = parsePlaceQuery(q);
+    const ask = async (n) => ({ query: n, places: parseGeocode(await (await fetch(geocodeUrl(n))).json()) });
     let found = [];
-    try { found = parseGeocode(await (await fetch(geocodeUrl(q))).json()); } catch { /* offline */ }
+    try { found = mergePlaces(query, await Promise.all(geocodeNames(query.name).map(ask))); } catch { /* offline */ }
     box.replaceChildren(...(found.length ? found.map((r) => h('div', { class: 'row' },
       h('span', { class: 'grow' }, r.label),
       h('button', {

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { buildTopicQuery, buildYoutubeSearchUrl } from '../../src/lib/query.js';
-import { normalizeConfig, normalizeEntry, validateEntry, defaultConfig } from '../../src/lib/config.js';
+import { normalizeConfig, normalizeEntry, validateEntry, defaultConfig, migrateWeather } from '../../src/lib/config.js';
 import { formatDateUk, formatTime } from '../../src/lib/datetime.js';
 
 test('topic query', () => {
@@ -24,7 +24,8 @@ test('defaults', () => {
   assert.equal(c.topics.length, 5);
   assert.deepEqual(c.topics.map((t) => t.id), ['recipes', 'garden', 'news', 'health', 'stories']);
   assert.deepEqual(c.news.map((n) => n.id), ['espreso', 'pravda', 'suspilne']);
-  assert.equal(c.weather.city, 'Львів');
+  assert.equal(c.weather.city, 'Рудки');
+  assert.deepEqual([c.weather.lat, c.weather.lon], [49.653, 23.487]);
   assert.ok(c.topics[0].items.includes('борщ український'));
   assert.equal(c.topics[1].prefix, 'город');
   assert.equal(c.hideShortsComments, true);
@@ -68,4 +69,13 @@ test('date and time formatting', () => {
   const d = new Date(2026, 10, 1, 7, 5);
   assert.equal(formatTime(d), '07:05');
   assert.equal(formatDateUk(d), 'неділя, 1 листопада 2026');
+});
+
+test('weather: the old default Львів becomes Рудки once; a chosen town stays', () => {
+  const old = { city: 'Львів', lat: 49.838, lon: 24.023, enabled: false };
+  assert.deepEqual(migrateWeather(old, 3), { city: 'Рудки', lat: 49.653, lon: 23.487, enabled: false });
+  assert.equal(old.city, 'Львів'); // input not mutated
+  assert.equal(migrateWeather(old, 4), null); // already migrated: the grandson may have chosen Львів since
+  assert.equal(migrateWeather({ city: 'Тернопіль', lat: 49.553, lon: 25.594 }, 3), null);
+  assert.equal(migrateWeather(undefined, 1), null); // fresh install: the default is already Рудки
 });
