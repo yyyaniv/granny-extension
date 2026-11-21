@@ -68,7 +68,7 @@ async function showWeather() {
 async function showPower() {
   const box = document.getElementById('power');
   if (!cfg.power.enabled) { box.hidden = true; return; }
-  const { days } = await getPower().catch(() => ({ days: {} }));
+  const { days } = await getPower(cfg.power.provider).catch(() => ({ days: {} }));
   const now = new Date();
   const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
   const line = homeLine(slotsFor(days, cfg.power.group, now), slotsFor(days, cfg.power.group, tomorrow), now);

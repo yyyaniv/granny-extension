@@ -2,7 +2,7 @@ import { loadConfig, saveConfig, getAnnounceAudio, setAnnounceAudio } from '../l
 import { normalizeConfig, migrateConfig, normalizeEntry, validateEntry, validateTile, newId, ALL_DAYS } from '../lib/config.js';
 import { DAY_NAMES_SHORT } from '../lib/datetime.js';
 import { getFolderId, listSaved, createCategory, deleteCategory } from '../lib/saved.js';
-import { GROUPS } from '../lib/power.js';
+import { PROVIDERS, providerFor } from '../lib/power-providers.js';
 import { geocodeUrl, parseGeocode, parsePlaceQuery, geocodeNames, mergePlaces } from '../lib/weather.js';
 
 const $ = (id) => document.getElementById(id);
@@ -219,13 +219,24 @@ function initWeather() {
 
 // ---------------- power outages ----------------
 function renderPower() {
+  const p = providerFor(cfg.power.provider);
   $('power-on').checked = cfg.power.enabled;
+  $('power-provider').value = p.id;
+  $('power-group').replaceChildren(...p.groups.map((g) => h('option', { value: g }, g)));
   $('power-group').value = cfg.power.group;
+  $('power-site').textContent = `Джерело: ${p.site} (там свою групу можна знайти за адресою).`;
 }
 
 function initPower() {
-  $('power-group').replaceChildren(...GROUPS.map((g) => h('option', { value: g }, g)));
+  $('power-provider').replaceChildren(...PROVIDERS.map((p) => h('option', { value: p.id }, `${p.name} (${p.region})`)));
   $('power-on').addEventListener('change', (e) => { cfg.power.enabled = e.target.checked; persist(); });
+  $('power-provider').addEventListener('change', (e) => {
+    const p = providerFor(e.target.value);
+    cfg.power.provider = p.id;
+    if (!p.groups.includes(cfg.power.group)) cfg.power.group = p.groups[0];
+    renderPower();
+    persist();
+  });
   $('power-group').addEventListener('change', (e) => { cfg.power.group = e.target.value; persist(); });
 }
 

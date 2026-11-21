@@ -3,8 +3,11 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { parseLoe, parseLoeHtml, homeLine, mergeDays, fmtMin, dayKey, GROUPS } from '../../src/lib/power.js';
 import { normalizeConfig, defaultConfig } from '../../src/lib/config.js';
+import { PROVIDERS, DEFAULT_PROVIDER, providerFor } from '../../src/lib/power-providers.js';
 
 const fixture = JSON.parse(readFileSync(new URL('../fixtures/loe-menus.json', import.meta.url), 'utf8'));
+// the live API (Nov 2026): a bare array, «Tomorrow» not announced yet, full picture in imageUrl
+const live = JSON.parse(readFileSync(new URL('../fixtures/loe-menus-array.json', import.meta.url), 'utf8'));
 const at = (h, m = 0) => new Date(2026, 10, 21, h, m);
 
 test('fixture: Львівобленерго API -> today and tomorrow by date, archive skipped', () => {
@@ -59,8 +62,49 @@ test('helpers and config: group 2.2 on by default, bad group falls back', () => 
   assert.equal(fmtMin(0), '00:00');
   assert.equal(fmtMin(1440), '24:00');
   assert.equal(dayKey(at(1)), '2026-11-21');
-  assert.deepEqual(defaultConfig().power, { enabled: true, group: '2.2' });
-  assert.deepEqual(normalizeConfig({}).power, { enabled: true, group: '2.2' });
-  assert.deepEqual(normalizeConfig({ power: { enabled: false, group: '4.1' } }).power, { enabled: false, group: '4.1' });
-  assert.deepEqual(normalizeConfig({ power: { group: '9.9' } }).power, { enabled: true, group: '2.2' });
+  assert.deepEqual(defaultConfig().power, { enabled: true, provider: 'loe', group: '2.2' });
+  assert.deepEqual(normalizeConfig({}).power, { enabled: true, provider: 'loe', group: '2.2' });
+  // 1.7.0 configs have no provider -> Львівобленерго, group kept
+  assert.deepEqual(normalizeConfig({ power: { enabled: false, group: '4.1' } }).power, { enabled: false, provider: 'loe', group: '4.1' });
+  assert.deepEqual(normalizeConfig({ power: { group: '9.9' } }).power, { enabled: true, provider: 'loe', group: '2.2' });
+  assert.deepEqual(normalizeConfig({ power: { provider: 'nope', group: '3.1' } }).power, { enabled: true, provider: 'loe', group: '3.1' });
+});
+
+test('live API shape: bare array parsed, picture URL made absolute, tomorrow missing', () => {
+  const days = parseLoe(live);
+  assert.deepEqual(Object.keys(days), ['2026-11-21']);
+  const d = days['2026-11-21'];
+  assert.equal(d.updated, '07:20');
+  assert.deepEqual(d.groups['2.2'], [[0, 30], [1080, 1290]]);
+  assert.deepEqual(Object.keys(d.groups).sort(), GROUPS);
+  assert.equal(d.image, 'https://api.loe.lviv.ua/media/6b012a2ea3b1c_GPV.png');
+  // the JSON-LD form has no imageUrl -> no picture
+  assert.equal(parseLoe(fixture)['2026-11-21'].image, '');
+});
+
+test('parseLoe: odd input gives nothing; strange image paths are dropped', () => {
+  assert.deepEqual(parseLoe(null), {});
+  assert.deepEqual(parseLoe({}), {});
+  assert.deepEqual(parseLoe([null, { menuItems: null }]), {});
+  const one = (imageUrl) => parseLoe([{ menuItems: [{ name: 'Today', imageUrl, rawHtml: '<p>Графік погодинних відключень на 1.12.2026</p><p>Група 1.1. Електроенергія є.</p>' }] }])['2026-12-01'].image;
+  assert.equal(one('/media/a_GPV.png'), 'https://api.loe.lviv.ua/media/a_GPV.png');
+  assert.equal(one('javascript:alert(1)'), '');
+  assert.equal(one('/media/../x.png'), '');
+  assert.equal(one(''), '');
+});
+
+test('providers: every entry is complete, ids unique, default exists, load uses the given fetch', async () => {
+  assert.equal(new Set(PROVIDERS.map((p) => p.id)).size, PROVIDERS.length);
+  for (const p of PROVIDERS) {
+    for (const k of ['id', 'name', 'region', 'site']) assert.ok(typeof p[k] === 'string' && p[k], `${p.id}.${k}`);
+    assert.ok(Array.isArray(p.groups) && p.groups.length, `${p.id}.groups`);
+    assert.equal(typeof p.load, 'function');
+  }
+  assert.equal(providerFor('???').id, DEFAULT_PROVIDER);
+  const calls = [];
+  const fakeFetch = async (url) => { calls.push(url); return { ok: true, json: async () => live }; };
+  const days = await providerFor('loe').load(fakeFetch);
+  assert.match(calls[0], /^https:\/\/api\.loe\.lviv\.ua\/api\/menus/);
+  assert.deepEqual(days['2026-11-21'].groups['2.2'], [[0, 30], [1080, 1290]]);
+  await assert.rejects(providerFor('loe').load(async () => ({ ok: false, status: 503 })), /503/);
 });

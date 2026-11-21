@@ -11,11 +11,22 @@
     <a class="big muted back" href="home.html" data-nav data-autofocus>◀ Назад</a>
     <h1 id="heading">💡 Світло</h1>
   </header>
-  <main class="fill days">
+  <main id="days" class="fill days">
     <section id="today" class="pday"></section>
     <section id="tomorrow" class="pday"></section>
   </main>
   <p id="src" class="src"></p>
+  <div id="map" class="map" hidden>
+    <div class="maphead">
+      <button id="map-back" type="button" class="big small muted" data-nav>◀ Назад до мого графіка</button>
+      <h1 id="map-title"></h1>
+      <button id="map-zoom" type="button" class="big small accent" data-nav>🔍 Більше</button>
+    </div>
+    <div id="map-box" class="mapbox">
+      <img id="map-img" alt="Графік відключень для всіх груп">
+      <p id="map-fail" class="none" hidden>Картинку не вдалося завантажити. Перевірте інтернет.</p>
+    </div>
+  </div>
   <script type="module" src="power.js"></script>
 </body>
 </html>

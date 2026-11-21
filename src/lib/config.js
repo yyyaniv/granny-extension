@@ -1,5 +1,7 @@
 // Config defaults, migration and validation (pure).
 
+import { DEFAULT_PROVIDER, PROVIDERS, providerFor } from './power-providers.js';
+
 export const ALL_DAYS = [1, 2, 3, 4, 5, 6, 0];
 export const ENTRY_TYPES = ['youtube-channel', 'youtube-video', 'facebook-profile'];
 export const CHURCH_STYLES = ['new', 'old', 'off'];
@@ -142,15 +144,19 @@ export function migrateWeather(weather, fromVersion) {
   return { ...w, city: d.city, lat: d.lat, lon: d.lon };
 }
 
-// Power outage schedule on the home page (Львівобленерго group).
+// Power outage schedule on the home page: which oblenergo (power-providers.js) and which group.
 export function defaultPower() {
-  return { enabled: true, group: '2.2' };
+  return { enabled: true, provider: DEFAULT_PROVIDER, group: '2.2' };
 }
 
 function normPower(raw) {
   const d = defaultPower();
   if (!raw || typeof raw !== 'object') return d;
-  return { enabled: raw.enabled !== false, group: /^[1-6]\.[12]$/.test(str(raw.group)) ? str(raw.group) : d.group };
+  // configs from 1.7.0 have no provider: they were Львівобленерго
+  const provider = PROVIDERS.some((p) => p.id === str(raw.provider)) ? str(raw.provider) : d.provider;
+  const { groups } = providerFor(provider);
+  const group = groups.includes(str(raw.group)) ? str(raw.group) : groups.includes(d.group) ? d.group : groups[0];
+  return { enabled: raw.enabled !== false, provider, group };
 }
 
 export function defaultSchedule() {

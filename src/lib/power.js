@@ -1,8 +1,10 @@
-// Power outage schedule (Львівобленерго, poweron.loe.lviv.ua). Pure helpers: parse the API text, home-page line.
+// Power outage schedule. Pure helpers: Львівобленерго parser (poweron.loe.lviv.ua) and the home-page line.
+// Other regions plug in through power-providers.js.
 // The API gives HTML like «<p>Група 2.2. Електроенергії немає з 00:00 до 00:30, з 18:00 до 21:30.</p>»
 // or «Група 2.2. Електроенергія є.» for the day in «Графік погодинних відключень на 21.11.2026».
 
-export const LOE_URL = 'https://api.loe.lviv.ua/api/menus?page=1&type=photo-grafic';
+export const LOE_ORIGIN = 'https://api.loe.lviv.ua';
+export const LOE_URL = `${LOE_ORIGIN}/api/menus?page=1&type=photo-grafic`;
 export const GROUPS = ['1.1', '1.2', '2.1', '2.2', '3.1', '3.2', '4.1', '4.2', '5.1', '5.2', '6.1', '6.2'];
 export const DAY_MIN = 24 * 60;
 
@@ -44,15 +46,26 @@ export function parseLoeHtml(html) {
   return { date, updated: u ? `${u[1].padStart(2, '0')}:${u[2]}` : '', groups };
 }
 
-/** API json -> { "2026-11-21": { updated, groups }, ... } (today's and tomorrow's items; the archive is skipped). */
+/** "/media/x_GPV.png" -> "https://api.loe.lviv.ua/media/x_GPV.png"; anything else -> "". */
+function loeImage(path) {
+  const p = String(path || '');
+  if (/^https:\/\//i.test(p)) return p;
+  return /^\/media\/[\w.-]+\.(png|jpe?g|webp)$/i.test(p) ? LOE_ORIGIN + p : '';
+}
+
+/**
+ * API json -> { "2026-11-21": { updated, groups, image }, ... } (today's and tomorrow's items; the archive is skipped).
+ * The API answers with a bare array of menus; the older JSON-LD form wraps it in «hydra:member» — both are read.
+ * `image` is the full picture of the schedule (all groups), "" when the item has none.
+ */
 export function parseLoe(json) {
   const out = {};
-  const menus = json && Array.isArray(json['hydra:member']) ? json['hydra:member'] : [];
+  const menus = Array.isArray(json) ? json : json && Array.isArray(json['hydra:member']) ? json['hydra:member'] : [];
   for (const menu of menus) {
-    for (const item of Array.isArray(menu.menuItems) ? menu.menuItems : []) {
+    for (const item of menu && Array.isArray(menu.menuItems) ? menu.menuItems : []) {
       if (!/^(today|tomorrow)$/i.test(String(item.name || ''))) continue;
       const day = parseLoeHtml(item.rawHtml || item.rawMobileHtml);
-      if (day) out[day.date] = { updated: day.updated, groups: day.groups };
+      if (day) out[day.date] = { updated: day.updated, groups: day.groups, image: loeImage(item.imageUrl) };
     }
   }
   return out;
