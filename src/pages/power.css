@@ -1,0 +1,15 @@
+/* Today and tomorrow, one under the other: a 24-hour strip (red = no power) and the hours in words. */
+.days { display: flex; flex-direction: column; justify-content: space-evenly; gap: clamp(10px, 3vh, 30px); max-width: 1400px; width: 100%; margin: 0 auto; }
+.pday h2 { margin: 0 0 6px; font-size: clamp(26px, 5vh, 40px); }
+.strip { position: relative; display: flex; height: clamp(44px, 9vh, 80px); border: var(--bd); border-radius: 18px; overflow: hidden; background: #8fd18a; }
+.strip .off { position: absolute; top: 0; bottom: 0; background: #e0574c; }
+.strip .past { position: absolute; top: 0; bottom: 0; left: 0; background: rgba(251, 246, 238, 0.6); }
+.strip .now { position: absolute; top: 0; bottom: 0; width: 6px; margin-left: -3px; background: var(--ring); }
+.hours { position: relative; height: 1.3em; font-size: clamp(16px, 2.6vh, 22px); color: #4a4a4a; }
+.hours span { position: absolute; transform: translateX(-50%); }
+.hours span:first-child { transform: none; }
+.hours span:last-child { transform: translateX(-100%); }
+.pday .say { margin: 4px 0 0; font-size: clamp(24px, 4.6vh, 38px); font-weight: 700; }
+.pday .say b { color: #b3261e; }
+.pday .none { margin: 0; font-size: clamp(24px, 4.4vh, 36px); color: #4a4a4a; }
+.src { margin: 6px 0 0; font-size: clamp(16px, 2.6vh, 22px); color: #4a4a4a; text-align: center; }

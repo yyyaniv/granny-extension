@@ -1,6 +1,6 @@
 import { normalizeConfig, migrateConfig, migrateWeather, CONFIG_VERSION } from './config.js';
 
-const KEYS = ['cfg_tiles', 'cfg_schedule', 'cfg_topics', 'cfg_flags', 'cfg_version', 'cfg_news', 'cfg_weather'];
+const KEYS = ['cfg_tiles', 'cfg_schedule', 'cfg_topics', 'cfg_flags', 'cfg_version', 'cfg_news', 'cfg_weather', 'cfg_power'];
 
 /** Upgrades stored topics (and the old default weather town) once (cfg_version < CONFIG_VERSION). Returns the (possibly updated) raw storage object. */
 export async function ensureMigrated(s) {
@@ -26,6 +26,7 @@ export async function loadConfig() {
     topics: s.cfg_topics,
     news: s.cfg_news,
     weather: s.cfg_weather,
+    power: s.cfg_power,
     hideShortsComments: flags.hideShortsComments,
     fullscreenOnStream: flags.fullscreenOnStream,
     church: flags.church,
@@ -41,6 +42,7 @@ export async function saveConfig(cfg) {
     cfg_topics: c.topics,
     cfg_news: c.news,
     cfg_weather: c.weather,
+    cfg_power: c.power,
     cfg_version: CONFIG_VERSION,
     cfg_flags: { hideShortsComments: c.hideShortsComments, fullscreenOnStream: c.fullscreenOnStream, church: c.church },
   });

@@ -2,6 +2,7 @@ import { loadConfig, saveConfig, getAnnounceAudio, setAnnounceAudio } from '../l
 import { normalizeConfig, migrateConfig, normalizeEntry, validateEntry, validateTile, newId, ALL_DAYS } from '../lib/config.js';
 import { DAY_NAMES_SHORT } from '../lib/datetime.js';
 import { getFolderId, listSaved, createCategory, deleteCategory } from '../lib/saved.js';
+import { GROUPS } from '../lib/power.js';
 import { geocodeUrl, parseGeocode, parsePlaceQuery, geocodeNames, mergePlaces } from '../lib/weather.js';
 
 const $ = (id) => document.getElementById(id);
@@ -216,6 +217,18 @@ function initWeather() {
   $('weather-q').addEventListener('keydown', (e) => { if (e.key === 'Enter') find(); });
 }
 
+// ---------------- power outages ----------------
+function renderPower() {
+  $('power-on').checked = cfg.power.enabled;
+  $('power-group').value = cfg.power.group;
+}
+
+function initPower() {
+  $('power-group').replaceChildren(...GROUPS.map((g) => h('option', { value: g }, g)));
+  $('power-on').addEventListener('change', (e) => { cfg.power.enabled = e.target.checked; persist(); });
+  $('power-group').addEventListener('change', (e) => { cfg.power.group = e.target.value; persist(); });
+}
+
 // ---------------- topics ----------------
 function renderTopics() {
   const box = $('topics');
@@ -392,6 +405,7 @@ function renderAll() {
   renderTopics();
   renderNews();
   renderWeather();
+  renderPower();
   $('hideShorts').checked = cfg.hideShortsComments;
   $('fullscreen').checked = cfg.fullscreenOnStream;
   $('church').value = cfg.church;
@@ -406,6 +420,7 @@ async function init() {
   initBackup();
   initSaved();
   initWeather();
+  initPower();
   $('church').addEventListener('change', (e) => { cfg.church = e.target.value; persist(); });
   renderAll();
   // First run: store defaults so that background sees a config.

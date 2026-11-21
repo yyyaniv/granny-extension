@@ -9,6 +9,11 @@ body.home { height: 100vh; display: flex; flex-direction: column; padding: 14px 
 .weather { font-size: clamp(24px, 4.2vh, 36px); font-weight: 700; color: var(--ink); text-decoration: none; background: #bfe3f5; border: 3px solid #1b1b1b; border-radius: 16px; padding: 0 14px; margin: 6px 0; }
 .weather:hover { filter: brightness(0.93); }
 .weather:focus { outline: 6px solid var(--ring); outline-offset: 2px; }
+/* the outage line (Львівобленерго): green while there is power, pink while it is off; opens the full schedule */
+.power { font-size: clamp(22px, 3.8vh, 34px); font-weight: 700; color: var(--ink); text-decoration: none; background: #c5e6a6; border: 3px solid #1b1b1b; border-radius: 16px; padding: 0 14px; margin: 0 0 6px; max-width: 62vw; }
+.power.is-off { background: #f4b6b0; }
+.power:hover { filter: brightness(0.93); }
+.power:focus { outline: 6px solid var(--ring); outline-offset: 2px; }
 .feast { font-size: clamp(24px, 4vh, 36px); font-weight: 700; color: #6a1b9a; }
 .feast.is-fast { color: #b3261e; }
 .next { font-size: clamp(24px, 4vh, 36px); color: #8a3b00; min-height: 1.3em; }

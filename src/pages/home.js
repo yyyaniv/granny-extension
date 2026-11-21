@@ -4,6 +4,8 @@ import { formatTime, formatDateUk } from '../lib/datetime.js';
 import { enableNav, el } from './nav.js';
 import { getWeather } from './weather-data.js';
 import { shortLine } from '../lib/weather.js';
+import { homeLine } from '../lib/power.js';
+import { getPower, slotsFor } from './power-data.js';
 import { feastNotice, feastLine, fastOn } from '../lib/church.js';
 
 const tiles = document.getElementById('tiles');
@@ -49,6 +51,7 @@ async function render() {
     ...cfg.topics.map((t) => tile(t.icon, t.title, `topic.html?id=${encodeURIComponent(t.id)}`, `muted topic-${t.id}`)));
   tick();
   showWeather();
+  showPower();
   const first = tiles.querySelector('[data-nav]');
   if (first && !document.activeElement.closest?.('[data-nav]')) first.focus();
 }
@@ -60,6 +63,18 @@ async function showWeather() {
   // a button: opens the week's forecast
   box.textContent = w ? `${shortLine(w)} · ${cfg.weather.city} ›` : '';
   box.hidden = !w;
+}
+
+async function showPower() {
+  const box = document.getElementById('power');
+  if (!cfg.power.enabled) { box.hidden = true; return; }
+  const { days } = await getPower().catch(() => ({ days: {} }));
+  const now = new Date();
+  const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  const line = homeLine(slotsFor(days, cfg.power.group, now), slotsFor(days, cfg.power.group, tomorrow), now);
+  box.textContent = line ? `${line.text} ›` : '';
+  box.classList.toggle('is-off', line?.state === 'off');
+  box.hidden = !line;
 }
 
 // Paused by the grandson: show Chrome's own new tab page (or a short note if that fails).
@@ -91,6 +106,7 @@ function start() {
   }, 400);
   setInterval(tick, 1000);
   setInterval(showWeather, 15 * 60000);
+  setInterval(showPower, 60000); // the text depends on the time; the data itself is cached for 15 min
   chrome.storage.onChanged.addListener(() => render());
 }
 

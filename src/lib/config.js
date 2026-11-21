@@ -142,6 +142,17 @@ export function migrateWeather(weather, fromVersion) {
   return { ...w, city: d.city, lat: d.lat, lon: d.lon };
 }
 
+// Power outage schedule on the home page (Львівобленерго group).
+export function defaultPower() {
+  return { enabled: true, group: '2.2' };
+}
+
+function normPower(raw) {
+  const d = defaultPower();
+  if (!raw || typeof raw !== 'object') return d;
+  return { enabled: raw.enabled !== false, group: /^[1-6]\.[12]$/.test(str(raw.group)) ? str(raw.group) : d.group };
+}
+
 export function defaultSchedule() {
   return [
     { id: 'sample-rosary', name: 'Вервиця', type: 'youtube-channel', url: 'https://www.youtube.com/@ugcctv', keywords: 'ВЕРВИЦЯ ЄДНАЄ', days: [...ALL_DAYS], time: '18:00', warnMinutes: 3, enabled: false },
@@ -156,6 +167,7 @@ export function defaultConfig() {
     topics: defaultTopics(),
     news: defaultNews(),
     weather: defaultWeather(),
+    power: defaultPower(),
     hideShortsComments: true,
     fullscreenOnStream: true,
     church: 'new',
@@ -218,6 +230,7 @@ export function normalizeConfig(raw) {
     topics: list(r.topics, normTopic, defaultTopics),
     news: list(r.news, normTile, defaultNews),
     weather: normWeather(r.weather),
+    power: normPower(r.power),
     hideShortsComments: r.hideShortsComments !== false,
     fullscreenOnStream: r.fullscreenOnStream !== false,
     // church holidays on the home page: 'new' (OCU/UGCC since 2023), 'old' (Julian) or 'off'
